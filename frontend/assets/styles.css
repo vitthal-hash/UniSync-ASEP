@@ -1,0 +1,681 @@
+/* frontend/assets/styles.css */
+
+/* Basic variables */
+:root{
+  --bg: #0f0b16;
+  --card: #18121f;
+  --muted: #bfb6d1;
+  --text: #efe9ff;
+  --accent: #9b5cff;
+  --accent-2: #7b4bff;
+  --border: rgba(255,255,255,0.06);
+  --success: #54d07d;
+  --danger: #ff6b6b;
+}
+
+/* light theme (toggled by .light on body) */
+body.light{
+  --bg: #f6f6fb;
+  --card: #ffffff;
+  --muted: #6b6b7a;
+  --text: #111827;
+  --accent: #6b46c1;
+  --accent-2: #5b38ff;
+  --border: rgba(0,0,0,0.06);
+}
+
+/* base */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  min-height:100%;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(155,92,255,0.08), transparent),
+              radial-gradient(900px 400px at 90% 90%, rgba(123,75,255,0.06), transparent),
+              var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding:0;
+}
+
+/* container for login/register */
+.container{max-width:1100px;margin:24px auto;padding:12px}
+
+/* cards */
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+  border:1px solid var(--border);
+  padding:18px;
+  border-radius:10px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+}
+
+/* header typography */
+header h1{margin:0;font-size:22px;}
+.subtitle{color:var(--muted);margin-top:6px;font-size:14px}
+
+/* forms */
+input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea {
+  width:100%;
+  padding:10px 12px;
+  border-radius:8px;
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.04);
+  color:var(--text);
+  margin-top:8px;
+}
+
+/* buttons */
+button{
+  background: linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:white;
+  border:0;
+  padding:10px 14px;
+  border-radius:8px;
+  cursor:pointer;
+}
+button.secondary-btn{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+}
+button.danger-btn{
+  background: linear-gradient(90deg,var(--danger),#ff4b4b);
+}
+
+/* sidebar layout */
+.dashboard{display:flex;min-height:calc(100vh - 48px)}
+.sidebar{
+  width:220px;
+  padding:18px;
+  border-right:1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
+}
+.sidebar .logo{font-weight:700;margin-bottom:12px}
+.sidebar nav a{
+  display:block;padding:10px 8px;border-radius:6px;color:var(--muted);text-decoration:none;margin-bottom:6px;
+}
+.sidebar nav a.active, .sidebar nav a:hover{background:rgba(255,255,255,0.02);color:var(--text)}
+.logout-btn, .theme-btn{display:block;margin-top:12px;width:100%;padding:8px 10px;border-radius:8px}
+
+/* main content */
+.main{flex:1;padding:22px}
+.main h1{margin:0;font-size:28px}
+.main .subtitle{margin-top:6px}
+
+/* group cards */
+.group-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px}
+.group-card{padding:14px;border-radius:10px;border:1px solid var(--border)}
+
+/* chat */
+.chat-header{display:flex;justify-content:space-between;align-items:center}
+.chat-window{
+  height:60vh;border-radius:10px;border:1px solid var(--border);padding:12px;margin-top:12px;overflow:auto;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
+}
+.msg{padding:8px;border-radius:8px;margin-bottom:8px;max-width:70%;}
+.msg.mine{background:linear-gradient(90deg, rgba(155,92,255,0.18), rgba(123,75,255,0.12));margin-left:auto}
+.msg .msg-user{font-size:13px;font-weight:600}
+.msg .msg-text{margin-top:6px}
+.msg .msg-time{font-size:11px;color:var(--muted);margin-top:6px}
+
+/* popup */
+.popup{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center}
+.popup .popup-content{background:var(--card);padding:18px;border-radius:10px;width:420px;border:1px solid var(--border)}
+
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.04);font-size:12px;color:var(--muted)}
+.badge.admin{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white}
+
+/* responsive */
+@media (max-width:900px){
+  .sidebar{display:none}
+  .dashboard{flex-direction:column}
+  .chat-window{height:50vh}
+}
+canvas {
+  max-width: 100%;
+  height: 300px !important;
+}
+/* Force multi-select to behave like a dropdown */
+select[multiple] {          /* collapsed height */
+    overflow: hidden !important;
+    padding: 6px !important;
+    border-radius: 6px !important;
+    appearance: none !important;
+    background-color: white !important;
+    cursor: pointer !important;
+}
+
+/* When user clicks (focus), expand */
+select[multiple]:focus {
+    height: auto !important;
+    max-height: 180px !important;
+    overflow-y: auto !important;
+    cursor: default !important;
+}
+
+/* Remove ugly scrollbars – optional */
+select[multiple]::-webkit-scrollbar {
+    width: 6px;
+}
+select[multiple]::-webkit-scrollbar-thumb {
+    background: #aaa;
+    border-radius: 3px;
+}
+.chat-input {
+  display: flex;
+  gap: 10px;
+  padding: 15px;
+  border-top: 1px solid #ddd;
+  background: white;
+}
+
+.chat-input input {
+  flex: 1;
+  height: 40px;
+  padding: 10px 14px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.chat-input button {
+  height: 40px;
+  padding: 0 20px;
+  font-size: 16px;
+}
+.msg {
+    max-width: 60%;
+    margin: 8px 0;
+    padding: 10px 14px;
+    background: #eeeeee;
+    border-radius: 12px;
+    width: fit-content;
+    overflow: visible; 
+}
+
+.msg.mine {
+    margin-left: auto;
+    background: #7b5cff;   /* your app’s purple */
+    color: white;
+    text-align: right;
+}
+.delete-btn {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.chat-image {
+    max-width: 220px;
+    border-radius: 8px;
+    margin-top: 5px;
+}
+
+.chat-video {
+    max-width: 260px;
+    border-radius: 8px;
+    margin-top: 5px;
+}
+
+.chat-input button {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.msg {
+    margin-bottom: 12px;
+}
+#emojiCategories button {
+  background: #6c47ff;
+  border: none;
+  padding: 6px;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+#emojiCategories button:hover {
+  background: #5530e8;
+}
+
+.emoji-btn {
+  background: #6c47ff;
+  border-radius: 10px;
+  font-size: 22px;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.emoji-btn:hover {
+  background: #5530e8;
+}
+
+/* Big media popup */
+#mediaPopup .popup-content {
+    width: 650px !important;
+    height: 520px !important;
+    max-height: 520px !important;
+    padding: 20px !important;
+    overflow: hidden !important;
+}
+
+/* Make inside scroll properly */
+#tabContent {
+    height: 430px !important;
+    overflow-y: auto !important;
+}
+
+#gifResults, #stickerResults, #emojiGrid {
+    max-height: 380px !important;
+    overflow-y: auto !important;
+}
+
+
+#sendBtn {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: white !important;
+    padding: 8px 18px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+#sendBtn:hover {
+    opacity: 0.85;
+}
+.msg-time {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-size: 11px;
+  margin-top: 6px;
+  color: #000000;   /* ← BLACK TIME */
+  opacity: 0.9;
+}
+
+
+.msg-time .ticks {
+  font-size: 15px;              /* larger ticks */
+  font-weight: bold;
+  color: #ffffff;               /* bright white ticks */
+}
+
+.msg-filter-container { position: relative; }
+
+.filter-menu div {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.filter-menu {
+    position: absolute;
+    top: -140px;          /* menu appears above 3 dots */
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 160px;
+    display: none;        /* IMPORTANT: hidden by default */
+    z-index: 99999;
+}
+
+.filter-menu.show {
+    display: block !important;   /* shown only when .show class is added */
+}
+
+
+.msg-filter-option {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.msg-filter-option:hover {
+  background: #eee;
+}
+.chat-input {
+    overflow: visible !important;
+}
+#msgFilterBtn {
+    background: white !important;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+.chat-input { overflow: visible !important; }
+.filter-menu { z-index: 99999 !important; }
+#msgFilterBtn {
+    background: #ffffff !important;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 24px !important;
+    font-weight: bold;
+    color: #000 !important;   /* ← MAKE DOTS VISIBLE */
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.preview-popup {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.preview-content {
+  background: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.preview-content img,
+.preview-content video {
+  max-width: 100%;
+  max-height: 80vh;
+}
+  .sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.sidebar nav {
+  flex-grow: 1;  /* pushes following elements to bottom */
+}
+
+.logout-btn {
+  margin-bottom: 10px;
+}
+
+.theme-btn {
+  margin-bottom: 20px;
+}
+.date-separator {
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+  margin: 12px 0;
+  font-weight: 500;
+}
+.member-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.member-menu {
+  position: relative;
+}
+
+.member-menu button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.menu-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 22px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  min-width: 140px;
+  z-index: 9999;
+  color: #000;           /* ✅ ADD THIS */
+}
+
+
+.menu-dropdown.show {
+  display: block;
+}
+
+.menu-dropdown div {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.menu-dropdown div:hover {
+  background: #eee;
+}
+
+.menu-dropdown .danger {
+  color: red;
+}
+/* Read-only multi-select (admin view) */
+select[multiple] {
+  min-height: 160px;
+  overflow-y: auto;
+}
+
+select[multiple] option:checked {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+}
+/* 🔥 Make ADMIN badge clearly visible */
+.badge.admin {
+  background: #22c55e;           /* bright green */
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow: 0 0 6px rgba(34,197,94,0.8);
+}
+
+/* Optional: slightly larger for readability */
+.member-row .badge.admin {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+/* ================================
+   REGISTER PAGE FORM VISIBILITY FIX
+   ================================ */
+
+.auth-card input,
+.auth-card select,
+.auth-card textarea {
+  background: #ffffff !important;
+  color: #111827 !important;     /* dark text */
+  border: 1px solid #d1d5db !important;
+}
+
+/* Placeholder text */
+.auth-card input::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Normal select options */
+.auth-card select option {
+  color: #111827 !important;
+  background: #ffffff !important;
+}
+
+/* MULTI-SELECT FIX (skills, interests, languages) */
+.auth-card select[multiple] {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+  min-height: 140px;
+}
+
+.auth-card select[multiple] option {
+  color: #111827 !important;
+  background: #ffffff !important;
+}
+
+.auth-card select[multiple] option:checked {
+  background: #6366f1 !important;
+  color: #ffffff !important;
+}
+/* ==========================
+   REGISTER FORM GRID LAYOUT
+   ========================== */
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+  margin-bottom: 24px;
+}
+
+/* Mobile fallback */
+@media (max-width: 768px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+#registerBtn {
+  width: 100%;
+  margin-top: 20px;
+}
+.poll-box {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.poll-option {
+  display: block;
+  margin: 6px 0;
+}
+
+.poll-voters {
+  font-size: 12px;
+  color: #555;
+}
+.poll-option-row {
+  margin-bottom: 8px;
+}
+
+.poll-voters-dropdown {
+  margin-left: 10px;
+  margin-top: 4px;
+  padding: 6px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  font-size: 13px;
+
+  position: relative;
+  z-index: 1000;   /* ⭐ IMPORTANT ⭐ */
+}
+
+
+.poll-voters-dropdown.hidden {
+  display: none;
+}
+
+.caret {
+  margin-left: 6px;
+  font-size: 12px;
+}
+.poll-option-row {
+  position: relative;
+}
+
+.poll-voters-dropdown {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  min-width: 160px;
+}
+.hidden {
+  display: none;
+}
+
+.poll-voters {
+  margin-top: 6px;
+  font-size: 13px;
+}
+.poll-option-row {
+  position: relative;
+}
+
+.poll-caret {
+  cursor: pointer;
+  margin-left: 8px;
+  font-size: 12px;
+  user-select: none;
+}
+
+.poll-voters {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #f5f5f5;
+  border-radius: 6px;
+  padding: 6px;
+  z-index: 9999;
+  min-width: 180px;
+}
+
+.hidden {
+  display: none;
+}
+/* ===============================
+   POLL VISIBILITY FIX (RECEIVER)
+   =============================== */
+
+/* Poll button text always visible */
+.msg:not(.mine) .poll-option {
+  background: #8b5cf6 !important;   /* purple */
+  color: #ffffff !important;        /* white text */
+  border: none;
+}
+
+/* Poll text & count inside button */
+.msg:not(.mine) .poll-option .poll-text,
+.msg:not(.mine) .poll-option .poll-count {
+  color: #ffffff !important;
+}
+
+/* Dropdown caret visible */
+.msg:not(.mine) .poll-caret {
+  color: #000000 !important;
+  font-weight: bold;
+}
+
+/* Voters dropdown readable */
+.msg:not(.mine) .poll-voters {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #ccc;
+}
+/* ===============================
+   POLL QUESTION VISIBILITY FIX
+   =============================== */
+
+/* Poll question visible for RECEIVED polls */
+.msg:not(.mine) .poll-box b {
+  color: #000000 !important;
+  font-weight: 600;
+}
+
+/* Optional: small spacing polish */
+.poll-box b {
+  display: block;
+  margin-bottom: 6px;
+}
+
+ 
+   
+  

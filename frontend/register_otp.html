@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniSync — Verify OTP</title>
+
+  <!-- layout + animations css -->
+  <link rel="stylesheet" href="assets/auth.css" />
+  <!-- keep global styles -->
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body class="auth-page">
+
+  <!-- Full-page animation container (shared) -->
+  <div class="global-anim-bg" aria-hidden="true">
+    <canvas id="bgMesh"></canvas>
+    <canvas id="bgFlow"></canvas>
+    <canvas id="bgParticles"></canvas>
+  </div>
+
+  <!-- NAVBAR (same as homepage) -->
+  <nav class="top-nav">
+    <div class="nav-left">
+      <a href="index2.html" class="logo">
+        <span class="sync-icon">⟳</span>
+        <span class="brand">Uni<span>sync</span></span>
+      </a>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="index2.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="features.html">Features</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="index.html" class="btn small outline">Login</a>
+      <a href="register_email.html" class="btn small primary">Join Now</a>
+    </div>
+  </nav>
+
+  <!-- MAIN two-column container (left: copy, right: card) -->
+  <main class="auth-container">
+    <section class="auth-left">
+      <div class="hero-copy">
+        <h1>Verify Your OTP</h1>
+        <p class="lead">Step 2 — Enter the OTP sent to your college email.</p>
+        <p class="muted">Check your inbox (and spam). The OTP is valid for a short time only.</p>
+      </div>
+    </section>
+
+    <aside class="auth-right">
+      <div class="card auth-card">
+        <h2>Enter OTP</h2>
+        <p style="color:var(--muted);font-size:14px;">An OTP was sent to your email. Please enter it below.</p>
+
+        <!-- *** ORIGINAL OTP FORM (kept unchanged) *** -->
+        <main class="card" style="max-width:500px;margin:0;">
+          <form id="otpForm">
+            <label>OTP</label>
+            <input type="text" id="otpInput" placeholder="Enter OTP" required>
+
+            <button type="submit" style="margin-top:10px;">Verify OTP</button>
+
+            <p id="error" style="display:none;color:#c33;margin-top:10px;"></p>
+          </form>
+        </main>
+        <!-- end original -->
+
+      </div>
+
+      <footer class="auth-footer">© UniSync</footer>
+    </aside>
+  </main>
+
+  <!-- global footer -->
+  <footer class="global-footer">
+    <div class="footer-grid">
+      <div class="col">
+        <h4>Unisync</h4>
+        <p>Revolutionizing college communication and analysis through innovative technology solutions.</p>
+      </div>
+      <div class="col">
+        <h4>Quick Links</h4>
+        <a href="index2.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="features.html">Features</a>
+        <a href="contact.html">Contact Us</a>
+      </div>
+      <div class="col">
+        <h4>Contact Info</h4>
+        <p>VIT Pune Campus</p>
+        <p>info@unisync.edu</p>
+        <p>+91 9876543210</p>
+      </div>
+    </div>
+    <div class="footer-bottom">Developed by VIT Pune Students | A College Communication & Analysis Platform</div>
+  </footer>
+
+  <!-- animations (existing) -->
+  <script src="assets/particles.js"></script>
+  <script src="assets/cursor_trail.js"></script>
+  <script src="assets/auth_animations.js"></script>
+  <script src="assets/flow_lines.js"></script>
+  <script src="assets/mesh_lines.js"></script>
+
+  <!-- keep your original OTP logic exactly unchanged -->
+  <script type="module">
+  import { apiPost } from "./assets/api.js";
+
+  const email = localStorage.getItem("unisync_email");
+  if (!email) {
+    window.location.href = "register_email.html";
+  }
+
+  document.getElementById("otpForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const otp = document.getElementById("otpInput").value.trim();
+    const errorEl = document.getElementById("error");
+
+    const result = await apiPost("/auth/verify-otp", { email, otp });
+
+    if (!result.success) {
+      errorEl.textContent = result.message;
+      errorEl.style.display = "block";
+      return;
+    }
+
+    // ⭐ SAVE TEMP TOKEN FOR NEXT STEP
+    localStorage.setItem("unisync_temp_token", result.tempToken);
+
+    window.location.href = "register_password.html";
+  });
+  </script>
+
+</body>
+</html>

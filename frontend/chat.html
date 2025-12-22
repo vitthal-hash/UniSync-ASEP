@@ -1,0 +1,1684 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UniSync — Chat</title>
+
+  <!-- Existing app styles (keeps look consistent) -->
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/dashboard-style.css" />
+
+  <!-- Chat-specific inline styles (your redesigned UI) -->
+  <style>
+    /* --- trimmed: this block is identical to your redesigned CSS in the UI file --- */
+    :root {
+      --primary-color: #6366f1;
+      --primary-light: #818cf8;
+      --primary-dark: #4f46e5;
+      --secondary-color: #10b981;
+      --accent-color: #f59e0b;
+      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --msg-bg: #ffffff;
+      --msg-bg-other: #f1f5f9;
+      --msg-border: #e2e8f0;
+      --msg-text: #1e293b;
+      --msg-time: #64748b;
+      --online-green: #10b981;
+      --offline-gray: #94a3b8;
+      --danger-color: #ef4444;
+      --warning-color: #f59e0b;
+    }
+    .light { --msg-bg: #ffffff; --msg-bg-other:#f8fafc; --msg-border:#e2e8f0; --msg-text:#0f172a; }
+    body.dark { --msg-bg:#1e293b; --msg-bg-other:#334155; --msg-border:#475569; --msg-text:#f1f5f9; --msg-time:#cbd5e1; }
+    * { transition: background-color .3s ease, border-color .3s ease; box-sizing: border-box; }
+
+    .dashboard-container { display:flex; height:100vh; overflow:hidden; background:var(--bg-gradient); position:relative; }
+    .dashboard-container::before { content:''; position:absolute; inset:0; background: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover; opacity:.05; }
+    /* Sidebar */
+    .sidebar { width:280px; background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border-right:1px solid rgba(255,255,255,0.06); padding:1.5rem; display:flex; flex-direction:column; z-index:100; }
+    .logo { display:flex; gap:12px; align-items:center; margin-bottom:2rem; font-size:1.8rem; font-weight:700; color:white; }
+    .logo i { color:var(--primary-light); animation:spin 10s linear infinite; }
+    @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+    .sidebar nav { display:flex; flex-direction:column; gap:0.5rem; flex:1; }
+    .sidebar nav a { display:flex; align-items:center; gap:12px; padding:.9rem 1rem; color: rgba(255,255,255,.9); text-decoration:none; border-radius:12px; font-weight:500; }
+    .sidebar nav a.active { background: rgba(255,255,255,0.12); box-shadow:0 4px 12px rgba(99,102,241,0.2); }
+    .sidebar-footer { margin-top:auto; display:flex; flex-direction:column; gap:.75rem; }
+    /* Chat main */
+    .chat-main { flex:1; display:flex; flex-direction:column; background:var(--msg-bg); border-radius:24px 0 0 24px; overflow:hidden; position:relative; box-shadow:-20px 0 60px rgba(0,0,0,.3); }
+    .chat-header { padding:1rem 1.5rem; border-bottom:1px solid var(--msg-border); display:flex; align-items:center; justify-content:space-between; background:var(--msg-bg); z-index:10; }
+    .chat-info { display:flex; align-items:center; gap:1rem; }
+    .chat-avatar { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:1.2rem; background:var(--bg-gradient); box-shadow:0 4px 12px rgba(99,102,241,.4); animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+    .chat-details h2 { margin:0; font-size:1.3rem; color:var(--msg-text); font-weight:600; }
+    .chat-details p { margin:0; font-size:.9rem; color:var(--msg-time); display:flex; align-items:center; gap:6px; }
+    .online-dot { width:8px; height:8px; border-radius:50%; background:var(--online-green); display:inline-block; animation:blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .chat-actions { display:flex; gap:.75rem; }
+
+    .chat-window { flex:1; overflow-y:auto; padding:1.5rem; display:flex; flex-direction:column; gap:1rem; background:linear-gradient(180deg,var(--msg-bg) 0%, var(--msg-bg-other) 100%); }
+    .msg { max-width:70%; padding:1rem; border-radius:18px; position:relative; animation:slideIn .3s ease-out; box-shadow:0 2px 8px rgba(0,0,0,.1); border:1px solid var(--msg-border); overflow: visible;}
+    @keyframes slideIn { from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:translateY(0)} }
+    /* Incoming messages — always dark readable text */
+.msg:not(.mine) .msg-user,
+.msg:not(.mine) .msg-text,
+.msg:not(.mine) .msg-time {
+    color: #000 !important;
+}
+
+    /* Outgoing (your messages) – WhatsApp style */
+.msg.mine {
+    background: #d9fdd3 !important;   /* WhatsApp green bubble */
+    color: #000 !important;
+    border: 1px solid #b4e8ab !important;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+.msg.mine .msg-user,
+.msg.mine .msg-time {
+    color: #000 !important;
+}
+
+    .msg-user { font-weight:600; font-size:.9rem; margin-bottom:.5rem; color:var(--msg-text); }
+    .msg.mine .msg-user { color: rgba(255,255,255,.9); }
+    .msg-text { line-height:1.5; word-wrap:break-word; }
+    .msg-time { font-size:.75rem; margin-top:.5rem; opacity:.8; display:flex; align-items:center; justify-content:space-between; }
+    .ticks { margin-left:.5rem; }
+    .chat-image { max-width:300px; max-height:300px; border-radius:12px; cursor:pointer; transition:transform .3s ease; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+    .chat-image:hover { transform:scale(1.02); }
+
+    .chat-input-area { padding:1rem 1.5rem; background:var(--msg-bg); border-top:1px solid var(--msg-border); display:flex; gap:.75rem; align-items:center; }
+    .input-wrapper { flex:1; display:flex; align-items:center; background:var(--msg-bg-other); border-radius:24px; padding:.5rem 1rem; border:1px solid var(--msg-border); }
+    #messageInput { flex:1; border:none; background:transparent; color:var(--msg-text); font-size:1rem; padding:.5rem; outline:none; }
+    .icon-btn { width:40px; height:40px; border-radius:50%; border:none; background:transparent; color:var(--msg-time); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .3s ease; }
+    .icon-btn:hover { background:var(--primary-light); color:white; transform:scale(1.1); }
+    #sendBtn { background: linear-gradient(135deg,var(--primary-color),var(--primary-dark)); color:white; border:none; padding:.75rem 1.5rem; border-radius:24px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:.5rem; box-shadow:0 4px 12px rgba(99,102,241,.3); }
+    #sendBtn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(99,102,241,.4); }
+
+    .popup { position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; z-index:1000; animation:fadeIn .3s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    .popup-content { background:var(--msg-bg); border-radius:24px; padding:2rem; max-width:500px; width:90%; max-height:80vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.3); animation:slideUp .3s ease; }
+    @keyframes slideUp { from{opacity:0; transform:translateY(50px)} to{opacity:1; transform:translateY(0)} }
+
+    #typingIndicator { padding:.5rem 1.5rem; color:var(--primary-color); font-style:italic; font-size:.9rem; animation:fadeInOut 1s infinite; }
+    @keyframes fadeInOut { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+    #replyPreview { background: linear-gradient(135deg, rgba(99,102,241,.07), rgba(59,130,246,.07)); border-left:4px solid var(--primary-color); margin:.5rem 0; padding:.75rem; border-radius:12px; display:flex; justify-content:space-between; align-items:center; animation:slideDown .3s ease; }
+    @keyframes slideDown { from{opacity:0; transform:translateY(-20px)} to{opacity:1; transform:translateY(0)} }
+
+    .filter-menu { position:absolute; bottom:100%; left:0; background:var(--msg-bg); border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,.2); padding:.5rem; display:none; min-width:200px; z-index:100; border:1px solid var(--msg-border); }
+    .filter-menu.show { display:block; animation:slideDown .2s ease; }
+    .msg-filter-option { padding:.75rem 1rem; border-radius:8px; cursor:pointer; transition:all .3s ease; color:var(--msg-text); }
+    .msg-filter-option:hover { background:var(--primary-color); color:white; }
+
+    /* small helpers */
+    .badge { font-size:11px; padding:2px 6px; border-radius:6px; background:rgba(0,0,0,0.06); margin-left:6px; }
+    .badge.admin { background: linear-gradient(90deg, rgba(155,92,255,.12), rgba(123,75,255,.08)); color:var(--msg-text); padding:2px 6px; }
+
+    /* responsive */
+    @media (max-width:768px) {
+      .sidebar { width:80px; padding:1rem; }
+      .logo span, .sidebar nav a span { display:none; }
+      .chat-main { border-radius:0; }
+      .msg { max-width:85%; }
+    }
+    /* ---------- FORCE SIDEBAR ALWAYS BLACK ---------- */
+.sidebar {
+    background: #000 !important;     /* solid black */
+    backdrop-filter: none !important;
+    border-right: none !important;
+}
+
+/* ---------- SIDEBAR TEXT ALWAYS WHITE ---------- */
+.sidebar nav a,
+.sidebar nav a i,
+.sidebar nav a span,
+.logo,
+.logo span,
+.logo i {
+    color: #fff !important;
+}
+
+/* ---------- KEEP HOVER FROM CHANGING BACKGROUND ---------- */
+.sidebar nav a:hover {
+    background: rgba(255,255,255,0.1) !important; /* subtle highlight */
+    color: #fff !important;                       /* still white text */
+    transform: none !important;                   /* stop slide effect */
+}
+
+/* ---------- ACTIVE ITEM ALSO WHITE TEXT ---------- */
+.sidebar nav a.active,
+.sidebar nav a.active i,
+.sidebar nav a.active span {
+    color: #fff !important;
+    background: rgba(255,255,255,0.15) !important;
+}
+/* Fix ticks visibility for both incoming and outgoing messages */
+.ticks {
+    color: #1a1a1a !important;     /* dark tick color */
+    font-weight: 600;
+}
+
+/* In dark mode, make ticks white */
+body.dark .ticks {
+    color: #ffffff !important;
+}
+/* ===============================
+   MESSAGE DROPDOWN CARET
+   =============================== */
+
+.msg {
+  position: relative;
+  overflow: visible;
+}
+
+/* container */
+.msg-actions-caret {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* sent → left */
+.message-row.mine .msg-actions-caret {
+  left: -18px;
+}
+
+/* received → right */
+.message-row:not(.mine) .msg-actions-caret {
+  right: -18px;
+}
+
+/* caret icon */
+.msg-caret {
+  cursor: pointer;
+  font-size: 14px;
+  color: #6b7280; /* neutral gray */
+  user-select: none;
+}
+
+.msg-caret:hover {
+  color: #111827;
+}
+
+
+
+/* sent menu opens right */
+.message-row.mine .msg-action-menu {
+  left: 20px;
+}
+
+/* received menu opens left */
+.message-row:not(.mine) .msg-action-menu {
+  right: 20px;
+}
+
+.msg-action-menu.hidden {
+  display: none;
+}
+.reaction-emoji,
+.reply-btn,
+.msg-caret {
+  cursor: pointer;
+}
+
+.reaction-emoji:hover,
+.reply-btn:hover {
+  opacity: 0.8;
+}
+/* Reply button visibility fix */
+.msg-action-menu .reply-btn {
+  color: #111827;            /* dark text */
+  font-weight: 600;
+}
+
+/* Explicit fix for received messages */
+.message-row:not(.mine) .msg-action-menu .reply-btn {
+  color: #111827;            /* force visible */
+}
+
+/* Hover feedback */
+.msg-action-menu .reply-btn:hover {
+  color: #2563eb;            /* blue on hover */
+}
+/* =========================
+   REACTION COUNT VISIBILITY
+   ========================= */
+
+.reaction-summary {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+/* individual emoji count chip */
+.reaction-summary span {
+  background: #f1f5f9;      /* light gray */
+  color: #111827;           /* dark text */
+  font-size: 13px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* sent messages (green bubble) */
+.msg.mine .reaction-summary span {
+  background: #c7f0c2;
+  color: #000;
+}
+
+/* dark mode */
+body.dark .reaction-summary span {
+  background: #374151;
+  color: #f9fafb;
+}
+.reaction-summary span {
+  cursor: pointer;
+}
+
+  </style>
+
+  <!-- socket.io client (keep same origin you use locally) -->
+  <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+</head>
+
+<body class="dashboard-page">
+  <!-- keep requireLogin check (assets/api.js) -->
+  <script type="module">
+    import { requireLogin } from "./assets/api.js";
+    requireLogin();
+  </script>
+<!-- SAME BACKGROUND AS GROUPS PAGE -->
+<div class="dashboard-bg">
+  <div class="bg-overlay"></div>
+</div>
+<div class="dashboard-particles" id="dashboardParticles"></div>
+
+  <div class="dashboard-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <i class="fas fa-sync-alt"></i>
+        <span>Uni<span>Sync</span></span>
+      </div>
+
+      <nav>
+        <a href="dashboard.html">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </a>
+        <a href="groups.html" class="active">
+          <i class="fas fa-users"></i>
+          <span>Groups</span>
+        </a>
+        <a href="matching.html">
+          <i class="fas fa-heart"></i>
+          <span>Matching</span>
+        </a>
+        <a href="analytics.html">
+          <i class="fas fa-chart-line"></i>
+          <span>Analytics</span>
+        </a>
+        <a href="profile.html">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="themeBtn" class="theme-btn">
+          <i class="fas fa-moon"></i> Theme
+        </button>
+        <button id="logoutBtn" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CHAT CONTENT -->
+    <main class="chat-main">
+      <div class="chat-header">
+        <div class="chat-info">
+          <div class="chat-avatar" id="groupAvatar">G</div>
+          <div class="chat-details">
+            <h2 id="groupName">Loading...</h2>
+            <p id="onlineCount">
+              <span class="online-dot"></span>
+              <span id="onlineText">0 online</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="chat-actions">
+          <button id="membersBtn" class="icon-btn" title="View Members">
+            <i class="fas fa-users"></i>
+          </button>
+          <button id="exitBtn" class="icon-btn" title="Exit Group" style="color: var(--danger-color);">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="typingIndicator"></div>
+
+      <div id="chatWindow" class="chat-window"></div>
+
+      <div id="replyPreview" style="display:none;"></div>
+<div id="adminOnlyNotice"
+     style="display:none; text-align:center; padding:8px;
+            color:#555; font-size:14px;">
+  Only admins can send messages
+</div>
+
+      <div class="chat-input-area">
+        <div class="msg-filter-container" style="position: relative;">
+          <button id="msgFilterBtn" class="icon-btn" title="Filter Options">
+            <i class="fas fa-sliders-h"></i>
+          </button>
+          <div id="msgFilterMenu" class="filter-menu">
+            <div class="msg-filter-option" data-target="all"><i class="fas fa-globe"></i> Send to All</div>
+            <div class="msg-filter-option" data-target="admins"><i class="fas fa-shield-alt"></i> Admins Only</div>
+            <div class="msg-filter-option" data-target="girls"><i class="fas fa-female"></i> Girls Only</div>
+            <div class="msg-filter-option" data-target="boys"><i class="fas fa-male"></i> Boys Only</div>
+            <hr>
+<div class="msg-filter-option" id="createPollBtn">
+  <i class="fas fa-poll"></i> Create Poll
+</div>
+          </div>
+        </div>
+
+        <button id="pinBtn" class="icon-btn" title="Attach File"><i class="fas fa-paperclip"></i></button>
+
+        <div class="input-wrapper">
+          <button id="emojiBtn" class="icon-btn" title="Emoji"><i class="far fa-smile"></i></button>
+          <input id="messageInput" placeholder="Type a message..." />
+        </div>
+
+        <input type="file" id="fileInput" style="display:none" />
+        <button id="sendBtn"><i class="fas fa-paper-plane"></i><span>Send</span></button>
+      </div>
+    </main>
+  </div>
+
+  <!-- POPUPS -->
+  <div id="membersPopup" class="popup">
+    <div class="popup-content">
+      <h3 style="margin-bottom:1rem; color:var(--msg-text);"><i class="fas fa-users"></i> Group Members</h3>
+      <div id="adminOnlyBox" style="display:none; margin-bottom:12px;">
+  <label style="font-weight:600;">
+    <input type="checkbox" id="adminOnlyToggle">
+    Only admins can send messages
+  </label>
+</div>
+
+      <div id="membersList" style="margin-top:10px;"></div>
+      <button id="closePopup" class="icon-btn" style="margin-top:1rem; background:var(--primary-color); color:white;"><i class="fas fa-times"></i> Close</button>
+    </div>
+  </div>
+
+  <div id="mediaPopup" class="popup">
+    <div class="popup-content">
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button id="tabEmoji" class="tab active">Emoji</button>
+        <button id="tabGif" class="tab">GIF</button>
+        <button id="tabSticker" class="tab">Stickers</button>
+        <button id="closeMediaPopup" class="icon-btn" style="margin-left:auto;"><i class="fas fa-times"></i></button>
+      </div>
+
+
+      <div id="tabContent">
+        <div id="emojiCategories" style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+          <button class="cat-btn" data-cat="smileys">😄</button>
+          <button class="cat-btn" data-cat="people">🧑</button>
+          <button class="cat-btn" data-cat="animals">🐶</button>
+          <button class="cat-btn" data-cat="food">🍔</button>
+          <button class="cat-btn" data-cat="activities">⚽</button>
+          <button class="cat-btn" data-cat="travel">✈️</button>
+          <button class="cat-btn" data-cat="objects">💡</button>
+          <button class="cat-btn" data-cat="symbols">❤️</button>
+          <button class="cat-btn" data-cat="flags">🏳️</button>
+        </div>
+        <div id="emojiGrid"></div>
+
+        <div id="gifPanel" style="display:none;"><div id="gifResults" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div></div>
+        <div id="stickerPanel" style="display:none;"><div id="stickerResults" style="display:flex;flex-wrap:wrap;gap:6px;"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="previewPopup" class="popup">
+    <div class="popup-content" style="max-width:800px; max-height:90vh;">
+      <button id="closePreview" class="icon-btn" style="position:absolute; top:1rem; right:1rem; z-index:1001; background:var(--danger-color); color:white;"><i class="fas fa-times"></i></button>
+      <div id="previewContainer"></div>
+    </div>
+  </div>
+<div id="pollPopup" class="popup">
+  <div class="popup-content">
+    <h3>Create Poll</h3>
+
+    <input id="pollQuestion" placeholder="Poll question" />
+
+    <div id="pollOptions">
+      <input placeholder="Option 1" />
+      <input placeholder="Option 2" />
+    </div>
+
+    <button id="addPollOption">+ Add option</button>
+    <br><br>
+    <button id="sendPollBtn">Send Poll</button>
+    <button onclick="closePoll()">Cancel</button>
+  </div>
+</div>
+  <!-- Main JS (module) - merged UI + full working logic from your earlier file -->
+  <script type="module">
+    /* -------------------------
+       Imports & constants
+       ------------------------- */
+    import { GroupsAPI, ChatAPI, AuthAPI } from "./assets/api.js";
+    const API_BASE = "http://localhost:5000/api";
+    let selectedTarget = "all";
+
+    /* -------------------------
+       DOM references
+       ------------------------- */
+    const params = new URLSearchParams(window.location.search);
+    const groupId = params.get("group");
+    if (!groupId) { window.location.href = "groups.html"; }
+
+    const chatWindow = document.getElementById("chatWindow");
+    const messageInput = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const groupNameEl = document.getElementById("groupName");
+    const onlineText = document.getElementById("onlineText");
+    const groupAvatar = document.getElementById("groupAvatar");
+
+    const membersPopup = document.getElementById("membersPopup");
+    const membersList = document.getElementById("membersList");
+    const previewPopup = document.getElementById("previewPopup");
+    const previewContainer = document.getElementById("previewContainer");
+    const closePreview = document.getElementById("closePreview");
+
+    const mediaPopup = document.getElementById("mediaPopup");
+    const closeMediaPopup = document.getElementById("closeMediaPopup");
+    const emojiGrid = document.getElementById("emojiGrid");
+    const gifResults = document.getElementById("gifResults");
+    const stickerResults = document.getElementById("stickerResults");
+    const emojiCategories = document.getElementById("emojiCategories");
+
+    const msgFilterBtn = document.getElementById("msgFilterBtn");
+    const msgFilterMenu = document.getElementById("msgFilterMenu");
+const pollPopup = document.getElementById("pollPopup");
+const createPollBtn = document.getElementById("createPollBtn");
+
+    const user = JSON.parse(localStorage.getItem("unisync_user") || "{}");
+    let readCounts = {};
+    let totalMembers = 0;
+    let initialLoad = true;
+    let replyingTo = null;
+let lastRenderedDateLabel = "";
+let amIAdmin = false;
+let adminOnlyChat = false;
+
+    /* -------------------------
+       Socket setup
+       ------------------------- */
+    const socket = io("http://localhost:5000");
+    if (user && user.id) {
+      socket.emit("user_online", { userId: user.id });
+      socket.emit("register_user", user.id);
+    }
+
+    window.addEventListener("beforeunload", () => {
+      if (user && user.id) socket.emit("user_offline", { userId: user.id });
+      socket.disconnect();
+    });
+
+    // Typing indicator emit
+    let typingTimeout;
+    messageInput.addEventListener("input", () => {
+      if (!groupId) return;
+      socket.emit("typing", { groupId, name: user.full_name });
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => socket.emit("stop_typing", { groupId }), 900);
+    });
+
+    /* -------------------------
+       Socket listeners
+       ------------------------- */
+    socket.on("new_message", (msg) => {
+  setTimeout(() => {
+    appendMessage(msg, msg.sender_id === user.id);
+  }, 30);
+});
+
+socket.on("reaction_update", (data) => {
+  const msg = document.querySelector(`[data-id="${data.messageId}"]`);
+  if (!msg) return;
+
+  let box = msg.querySelector(".reaction-summary");
+  if (!box) {
+    box = document.createElement("div");
+    box.className = "reaction-summary";
+    msg.insertBefore(box, msg.querySelector(".msg-time"));
+  }
+
+  box.innerHTML = "";
+  data.reactions.forEach(r => {
+   const chip = document.createElement("span");
+chip.innerText = `${r.emoji} ${r.count}`;
+chip.title = r.users || "";   // 👈 hover names
+chip.style.cursor = "pointer";
+box.appendChild(chip);
+  });
+});
+
+    socket.on("user_status_changed", () => {
+      loadMembers();
+      updateOnlineCount();
+    });
+
+    socket.on("typing", (name) => {
+      document.getElementById("typingIndicator").innerText = `${name} is typing...`;
+    });
+
+    socket.on("stop_typing", () => {
+      document.getElementById("typingIndicator").innerText = "";
+    });
+
+    socket.on("message_deleted", (messageId) => {
+      const el = document.querySelector(`[data-id="${messageId}"]`);
+      if (el) el.remove();
+    });
+
+    socket.on("message_read_update", async () => {
+      await fetchReadCounts();
+    });
+socket.on("poll_update", (data) => {
+  const pollBox = document.querySelector(
+    `.poll-box[data-poll="${data.poll_id}"]`
+  );
+  if (!pollBox) return;
+
+ data.options.forEach(o => {
+  const btn = pollBox.querySelector(
+    `.poll-option[data-opt="${o.id}"]`
+  );
+  if (btn) {
+    btn.innerText = `${o.text} (${o.votes.length})`;
+  }
+
+  const votersBox = pollBox.querySelector(
+    `.poll-voters[data-opt="${o.id}"]`
+  );
+  if (votersBox) {
+    votersBox.innerHTML = o.votes.length
+      ? o.votes.map(v => `<div>• ${escapeHtml(v.full_name)}</div>`).join("")
+      : `<div style="color:#888">No votes yet</div>`;
+  }
+});
+
+        
+
+      
+    `).join("")}
+  `;
+});
+
+
+
+    /* -------------------------
+       Emoji / GIF / Sticker logic
+       ------------------------- */
+    const GIPHY_KEY = "iVfTmh4nunMkCsuqJq2roErol7YciZ3m";
+    let emojiLoaded = false;
+
+    // open media popup (emoji button)
+    document.getElementById("emojiBtn").addEventListener("click", () => {
+      mediaPopup.style.display = "flex";
+      showTab("emoji");
+      loadAllEmojis();
+    });
+
+    closeMediaPopup?.addEventListener("click", () => mediaPopup.style.display = "none");
+
+    document.getElementById("tabGif").addEventListener("click", () => { showTab("gif"); loadGifs(); });
+    document.getElementById("tabSticker").addEventListener("click", () => { showTab("sticker"); loadStickers(); });
+    document.getElementById("tabEmoji").addEventListener("click", () => { showTab("emoji"); loadEmojiCategory("smileys"); });
+
+    document.querySelectorAll(".cat-btn").forEach(btn => btn.addEventListener("click", () => loadEmojiCategory(btn.dataset.cat)));
+
+    function showTab(type) {
+      emojiCategories.style.display = "none";
+      emojiGrid.style.display = "none";
+      document.getElementById("gifPanel").style.display = "none";
+      document.getElementById("stickerPanel").style.display = "none";
+      if (type === "emoji") { emojiCategories.style.display = "flex"; emojiGrid.style.display = "grid"; }
+      if (type === "gif") { document.getElementById("gifPanel").style.display = "block"; gifResults.innerHTML = ""; }
+      if (type === "sticker") document.getElementById("stickerPanel").style.display = "block";
+      document.getElementById("tabEmoji").classList.toggle("active", type === "emoji");
+      document.getElementById("tabGif").classList.toggle("active", type === "gif");
+      document.getElementById("tabSticker").classList.toggle("active", type === "sticker");
+    }
+
+    async function loadEmojiCategory(cat) {
+      try {
+        const res = await fetch("https://cdn.jsdelivr.net/npm/emoji.json@13.1.0/emoji.json");
+        const all = await res.json();
+        const filtered = all.filter(e => e.category && e.category.toLowerCase().includes(cat));
+        emojiGrid.innerHTML = "";
+        emojiGrid.style.display = "grid";
+        emojiGrid.style.gridTemplateColumns = "repeat(8, 1fr)";
+        emojiGrid.style.gap = "6px";
+        emojiGrid.style.maxHeight = "330px";
+        emojiGrid.style.overflowY = "auto";
+        filtered.forEach(e => {
+          const btn = document.createElement("button");
+          btn.textContent = e.char;
+          btn.className = "emoji-btn";
+          btn.style.fontSize = "22px";
+          btn.addEventListener("click", async () => {
+            await ChatAPI.sendMessage(groupId, { message_type: "emoji", message: e.char, target: selectedTarget });
+            mediaPopup.style.display = "none";
+          });
+          emojiGrid.appendChild(btn);
+        });
+      } catch (err) { console.warn("Emoji load failed", err); }
+    }
+
+    async function loadAllEmojis() {
+      if (emojiLoaded) return;
+      emojiLoaded = true;
+      try {
+        const res = await fetch("https://cdn.jsdelivr.net/npm/emoji.json@13.1.0/emoji.json");
+        const emojiList = await res.json();
+        emojiGrid.innerHTML = "";
+        emojiGrid.style.display = "grid";
+        emojiGrid.style.gridTemplateColumns = "repeat(8, 1fr)";
+        emojiGrid.style.gap = "6px";
+        emojiGrid.style.maxHeight = "330px";
+        emojiGrid.style.overflowY = "auto";
+        emojiList.forEach(e => {
+          const btn = document.createElement("button");
+          btn.textContent = e.char;
+          btn.className = "emoji-btn";
+          btn.style.fontSize = "22px";
+          btn.addEventListener("click", async () => {
+            await ChatAPI.sendMessage(groupId, { message_type: "emoji", message: e.char, target: selectedTarget });
+            mediaPopup.style.display = "none";
+          });
+          emojiGrid.appendChild(btn);
+        });
+      } catch (err) { console.warn("loadAllEmojis error", err); }
+    }
+
+    async function loadGifs() {
+      gifResults.innerHTML = "Loading...";
+      try {
+        const res = await fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=50&rating=g`);
+        const data = await res.json();
+        gifResults.innerHTML = "";
+        data.data.forEach(g => {
+          const url = g.images.fixed_height.url;
+          const img = document.createElement("img");
+          img.src = url; img.style.width = "120px"; img.style.cursor = "pointer";
+          img.addEventListener("click", async () => {
+            await ChatAPI.sendMessage(groupId, { message_type: "gif", attachment_url: url, target: selectedTarget });
+            mediaPopup.style.display = "none";
+          });
+          gifResults.appendChild(img);
+        });
+      } catch (err) { gifResults.innerHTML = "Failed to load GIFs"; console.warn(err); }
+    }
+
+    async function loadStickers() {
+      stickerResults.innerHTML = "Loading...";
+      try {
+        const res = await fetch(`https://api.giphy.com/v1/stickers/trending?api_key=${GIPHY_KEY}&limit=50`);
+        const data = await res.json();
+        stickerResults.innerHTML = "";
+        data.data.forEach(s => {
+          const url = s.images.fixed_height.url;
+          const img = document.createElement("img");
+          img.src = url; img.style.width = "100px"; img.style.cursor = "pointer";
+          img.addEventListener("click", async () => {
+            await ChatAPI.sendMessage(groupId, { message_type: "sticker", attachment_url: url, target: selectedTarget });
+            mediaPopup.style.display = "none";
+          });
+          stickerResults.appendChild(img);
+        });
+      } catch (err) { stickerResults.innerHTML = "Failed to load stickers"; console.warn(err); }
+    }
+
+    /* -------------------------
+       File upload
+       ------------------------- */
+    document.getElementById("pinBtn").addEventListener("click", () => document.getElementById("fileInput").click());
+    document.getElementById("fileInput").addEventListener("change", async () => {
+      const file = document.getElementById("fileInput").files[0];
+      if (!file) return;
+      try {
+        const res = await ChatAPI.uploadFile(groupId, file, selectedTarget);
+        if (!res?.success) console.warn("Upload warning:", res);
+      } catch (err) { console.warn("Upload failed", err); }
+      document.getElementById("fileInput").value = "";
+    });
+
+    /* -------------------------
+       Helper UI functions
+       ------------------------- */
+    function updateGroupAvatar(name) {
+      if (name && name.length > 0) groupAvatar.textContent = name.charAt(0).toUpperCase();
+    }
+
+    function updateOnlineDisplay(count) {
+      onlineText.textContent = `${count} online`;
+    }
+function getDateLabel(dateStr) {
+  const d = new Date(dateStr);
+  const today = new Date();
+
+  const d0 = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  const diffDays = (t0 - d0) / (1000 * 60 * 60 * 24);
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+    function formatTime(t) {
+      const d = new Date(t);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function scrollToBottom() {
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    window.openPreview = function(url, type) {
+      previewContainer.innerHTML = "";
+      if (type === "image") previewContainer.innerHTML = `<img src="${url}" style="max-width:100%; max-height:80vh;" />`;
+      else if (type === "video") previewContainer.innerHTML = `<video controls autoplay style="max-width:100%; max-height:80vh;"><source src="${url}"></video>`;
+      else previewContainer.innerHTML = `<iframe src="${url}" style="width:80vw; height:80vh;"></iframe>`;
+      previewPopup.style.display = "flex";
+    };
+
+    closePreview?.addEventListener("click", () => { previewPopup.style.display = "none"; previewContainer.innerHTML = ""; });
+
+    /* -------------------------
+       Append message (render)
+       ------------------------- */
+    function getTicks(msg) {
+      if (msg.sender_id !== user.id) return "";
+      const messageId = msg.id;
+      const readCount = readCounts[messageId] || 0;
+      const needed = Math.max(0, totalMembers - 1);
+      return readCount >= needed ? "✓✓" : "✓";
+    }
+
+    function appendMessage(msg, isMine) {
+      isMine = msg.sender_id === user.id;
+      const messageAgeMinutes = (Date.now() - new Date(msg.created_at).getTime()) / 60000;
+      const canDelete =
+  amIAdmin || (isMine && messageAgeMinutes < 15);
+
+const currentDateLabel = getDateLabel(msg.created_at);
+
+if (currentDateLabel !== lastRenderedDateLabel) {
+  const sep = document.createElement("div");
+  sep.className = "date-separator";
+  sep.innerText = currentDateLabel;
+  chatWindow.appendChild(sep);
+
+  lastRenderedDateLabel = currentDateLabel;
+}
+
+      const div = document.createElement("div");
+      div.className = isMine ? "msg mine" : "msg";
+      div.setAttribute("data-id", msg.id);
+      // 🔥 Render existing reactions
+
+
+      div.setAttribute("data-sender", msg.sender_id);
+
+      let content = "";
+      if (msg.message_type === "text") content = `<div class="msg-text">${escapeHtml(msg.message_content || msg.message)}</div>`;
+      else if (msg.message_type === "emoji") content = `<div class="msg-text" style="font-size:26px">${escapeHtml(msg.message_content || msg.message)}</div>`;
+      else if (msg.message_type === "gif" || msg.message_type === "sticker") content = `<img src="${msg.attachment_url}" class="chat-image">`;
+      else if (msg.message_type === "file") {
+        if (msg.mime_type && msg.mime_type.startsWith("image/")) {
+          content = `<img src="${msg.attachment_url}" class="chat-image" onclick="openPreview('${msg.attachment_url}','image')">`;
+        } else if (msg.mime_type && msg.mime_type.startsWith("video/")) {
+          content = `<video class="chat-video" onclick="openPreview('${msg.attachment_url}','video')"><source src="${msg.attachment_url}" type="${msg.mime_type}"></video>`;
+        } else {
+          content = `<div class="file-link" style="cursor:pointer;color:blue;text-decoration:underline" onclick="openPreview('${msg.attachment_url}','file')">${escapeHtml(msg.attachment_name || 'file')}</div>`;
+        }
+      }else if (msg.message_type === "poll") {
+
+  if (!msg.poll || !msg.poll.id) {
+    content = `<div style="color:#999;font-style:italic">Poll unavailable</div>`;
+  } else {
+    content = `
+      <div class="poll-box" data-poll="${msg.poll.id}">
+        <b>${escapeHtml(msg.poll.question)}</b>
+
+   ${msg.poll.options.map(o => `
+  <div class="poll-option-row"
+       style="display:flex; align-items:center; gap:6px; margin-top:8px; position:relative;">
+
+   <button class="poll-option" data-opt="${o.id}">
+  <span class="poll-text">${escapeHtml(o.text)}</span>
+  <span class="poll-count">(${o.votes.length})</span>
+</button>
+
+
+    <!-- inline dropdown icon -->
+    <span class="poll-caret"
+          data-opt="${o.id}"
+          style="
+            cursor:pointer;
+            font-size:12px;
+            line-height:1;
+            padding:2px 4px;
+          ">
+      ▾
+    </span>
+
+    <!-- voters dropdown -->
+    <div class="poll-voters hidden"
+         data-opt="${o.id}"
+         style="
+           position:absolute;
+           top:100%;
+           left:0;
+           margin-top:6px;
+           padding:6px;
+           background:#f5f5f5;
+           border-radius:6px;
+           font-size:13px;
+           z-index:9999;
+           min-width:160px;
+         ">
+      ${
+        o.votes.length
+          ? o.votes.map(v => `<div>• ${escapeHtml(v.full_name)}</div>`).join("")
+          : `<div style="color:#888">No votes yet</div>`
+      }
+    </div>
+
+  </div>
+`).join("")}
+
+      </div>
+    `;
+  }
+}
+
+
+              
+
+  let replyBlock = "";
+
+if (msg.reply_to) {
+  const original = document.querySelector(`[data-id="${msg.reply_to}"]`);
+  
+  let preview = "(media)";
+  let senderName = "User";
+
+  if (original) {
+  // if the original message was sent by YOU
+  if (original.dataset.sender == user.id) {
+    senderName = "You";
+  } else {
+  // Determine sender name correctly (even if .msg-user is missing)
+const originalSenderId = Number(original.dataset.sender);
+
+if (originalSenderId === Number(user.id)) {
+    senderName = "You";
+} else {
+    senderName = original.querySelector(".msg-user")?.innerText 
+              || msg.sender_name 
+              || "User";
+}
+
+  }
+
+
+    const textEl = original.querySelector(".msg-text");
+    const imgEl = original.querySelector("img.chat-image");
+    const vidEl = original.querySelector("video");
+    const fileEl = original.querySelector(".file-link");
+
+    if (textEl) preview = textEl.innerText.substring(0, 60);
+    else if (imgEl) preview = "(image)";
+    else if (vidEl) preview = "(video)";
+    else if (fileEl) preview = fileEl.innerText.substring(0, 40);
+  }
+
+  replyBlock = `
+    <div class="reply-reference"
+         data-target-id="${msg.reply_to}"
+         style="border-left:3px solid #999; padding-left:6px; margin-bottom:4px;
+                font-size:12px; cursor:pointer;">
+      <div style="font-weight:bold; color:#333;">${escapeHtml(senderName)}</div>
+      <div style="color:#555;">${escapeHtml(preview)}</div>
+    </div>
+  `;
+}
+
+
+
+      div.innerHTML = `
+       ${!isMine ? `<div class="msg-user">${escapeHtml(msg.full_name || msg.sender_name || 'User')}</div>` : ""}
+
+        ${replyBlock}
+        <div class="msg-body">
+  ${content}
+</div>
+          <!-- 🔹 MESSAGE ACTIONS (FOR ALL MESSAGE TYPES) -->
+  <div class="msg-actions">
+     <span class="msg-caret">▾</span>
+
+    <div class="msg-action-menu hidden">
+    <div class="reaction-bar">
+  <span class="reaction-emoji">👍</span>
+  <span class="reaction-emoji">❤️</span>
+  <span class="reaction-emoji">😂</span>
+  <span class="reaction-emoji">😮</span>
+  <span class="reaction-emoji">😢</span>
+  <span class="reaction-emoji">🙏</span>
+  <span class="reaction-emoji">🔥</span>
+  <span class="reaction-emoji">👏</span>
+  <span class="reaction-emoji">😡</span>
+  <span class="reaction-emoji">🤔</span>
+</div>
+
+
+      <!-- SAME reply button, only moved -->
+      <div class="reply-btn" data-id="${msg.id}">
+        ↩ Reply
+      </div>
+    </div>
+  </div>
+        <div class="msg-time">
+          
+          ${formatTime(msg.created_at)}
+          <span class="ticks">${getTicks(msg)}</span>
+        </div>
+        
+        ${canDelete ? `<button class="delete-btn" data-id="${msg.id}">Delete</button>` : ""}
+       
+      `;
+      // 🔥 Render existing reactions AFTER innerHTML
+if (msg.reactions && msg.reactions.length) {
+  let box = div.querySelector(".reaction-summary");
+  if (!box) {
+    box = document.createElement("div");
+    box.className = "reaction-summary";
+
+    const timeEl = div.querySelector(".msg-time");
+    if (timeEl) {
+      div.insertBefore(box, timeEl);
+    } else {
+      div.appendChild(box);
+    }
+  }
+
+  box.innerHTML = "";
+  msg.reactions.forEach(r => {
+    const chip = document.createElement("span");
+    chip.innerText = `${r.emoji} ${r.count}`;
+    chip.title = r.users || "";
+    chip.style.cursor = "pointer";
+    box.appendChild(chip);
+  });
+}
+
+     const row = document.createElement("div");
+row.className = isMine ? "message-row mine" : "message-row";
+row.appendChild(div);
+chatWindow.appendChild(row);
+
+      scrollToBottom();
+    }
+
+    // simple HTML escape
+    function escapeHtml(s) {
+      if (!s && s !== 0) return "";
+      return String(s).replace(/[&<>"']/g, function (m) { return ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;' })[m]; });
+    }
+    // ================================
+// Admin-only chat UI helper
+// ================================
+function applyAdminOnlyUI() {
+  const notice = document.getElementById("adminOnlyNotice");
+  const inputArea = document.querySelector(".chat-input-area");
+
+  if (adminOnlyChat && !amIAdmin) {
+    inputArea.style.display = "none";   // 👈 hide entire bar
+    notice.style.display = "block";
+  } else {
+    inputArea.style.display = "flex";
+    notice.style.display = "none";
+  }
+}
+
+
+// -------------------------
+// Reply button (Reply -> preview) handler
+// Place this AFTER `function escapeHtml(...) { ... }`
+// -------------------------
+chatWindow.addEventListener("click", (e) => {
+  // If user clicked the "Reply" button (or something inside it)
+  const replyBtn = e.target.closest && e.target.closest(".reply-btn");
+  if (replyBtn) {
+    // set global replyingTo id
+    replyingTo = replyBtn.dataset.id;
+
+    // find original message element and build a preview text
+    const original = document.querySelector(`[data-id="${replyingTo}"]`);
+    let previewText = "(media)";
+    let senderName = "User";
+
+    if (original) {
+      senderName = original.querySelector(".msg-user")?.innerText || senderName;
+      const textEl = original.querySelector(".msg-text");
+      const imgEl = original.querySelector("img.chat-image");
+      const vidEl = original.querySelector("video");
+      const fileEl = original.querySelector(".file-link");
+
+      if (textEl) previewText = textEl.innerText.substring(0, 60);
+      else if (imgEl) previewText = "(image)";
+      else if (vidEl) previewText = "(video)";
+      else if (fileEl) previewText = fileEl.innerText.substring(0, 40);
+    }
+
+    // show preview UI (replyPreview div exists in the page)
+    const preview = document.getElementById("replyPreview");
+    preview.innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px; width:100%;">
+        <div style="flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+          <div style="font-weight:700; font-size:13px; color:var(--msg-text);">${escapeHtml(senderName)}</div>
+          <div style="font-size:12px; color:#4b5563; margin-top:2px;">${escapeHtml(previewText)}</div>
+        </div>
+        <button id="cancelReply" style="margin-left:8px; background:transparent; border:none; cursor:pointer; color:var(--danger-color); font-weight:600;">Cancel</button>
+      </div>
+    `;
+    preview.style.display = "block";
+
+    // stop here (do not let other click handlers treat this as delete etc)
+    return;
+  }
+
+  // If user clicked the "Cancel" inside the reply preview
+  if (e.target && (e.target.id === "cancelReply" || e.target.closest && e.target.closest("#cancelReply"))) {
+    replyingTo = null;
+    const preview = document.getElementById("replyPreview");
+    preview.style.display = "none";
+    preview.innerHTML = "";
+    return;
+  }
+});
+
+    chatWindow.addEventListener("click", (e) => {
+  const ref = e.target.classList.contains("reply-reference")
+      ? e.target
+      : e.target.closest(".reply-reference");
+
+  if (!ref) return;
+
+  const targetId = ref.dataset.targetId;
+  const msgEl = document.querySelector(`[data-id="${targetId}"]`);
+
+  if (msgEl) {
+    msgEl.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // blur highlight effect — WhatsApp style
+    msgEl.style.transition = "filter 0.3s ease, background-color 0.3s ease";
+    msgEl.style.filter = "blur(2px)";
+    msgEl.style.backgroundColor = "#fff3b0";
+
+    setTimeout(() => {
+      msgEl.style.filter = "blur(0px)";
+    }, 300);
+
+    setTimeout(() => {
+      msgEl.style.backgroundColor = "";
+    }, 800);
+  }
+
+});
+
+
+
+
+
+  // 🔹 SEND VOTE
+ 
+
+
+
+
+
+    /* -------------------------
+       Delete handling
+       ------------------------- */
+    chatWindow.addEventListener("click", async (e) => {
+      if (!e.target.classList.contains("delete-btn")) return;
+      const messageId = e.target.getAttribute("data-id");
+      if (!confirm("Delete this message?")) return;
+      const res = await ChatAPI.deleteMessage(groupId, messageId);
+      if (res.success) e.target.parentElement.remove();
+      else alert(res.message || "Unable to delete");
+    });
+
+    /* -------------------------
+       Mark messages read when fully visible
+       ------------------------- */
+    function markMessagesRead() {
+      if (initialLoad) return;
+      const token = localStorage.getItem("unisync_token");
+      document.querySelectorAll(".msg").forEach(el => {
+        const messageId = el.dataset.id;
+        const senderId = Number(el.dataset.sender);
+        if (senderId === user.id) return;
+        const rect = el.getBoundingClientRect();
+        const fullyVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+        if (fullyVisible) {
+          fetch(`${API_BASE}/chat/${messageId}/read`, { method: "POST", headers: { Authorization: "Bearer " + token } });
+        }
+      });
+    }
+    chatWindow.addEventListener("scroll", markMessagesRead);
+
+    /* -------------------------
+       Ticks update
+       ------------------------- */
+    function updateAllMessageTicks() {
+      document.querySelectorAll(".msg").forEach(el => {
+        const id = el.dataset.id;
+        if (!id) return;
+        const tickEl = el.querySelector(".ticks");
+        if (!tickEl) return;
+        const readCount = readCounts[id] || 0;
+        const needed = Math.max(0, totalMembers - 1);
+        tickEl.innerText = readCount >= needed ? "✓✓" : "✓";
+      });
+    }
+
+    /* -------------------------
+       Fetch read counts from server
+       ------------------------- */
+    async function fetchReadCounts() {
+      try {
+        const token = localStorage.getItem("unisync_token");
+        const res = await fetch(`${API_BASE}/chat/${groupId}/reads`, { headers: { Authorization: "Bearer " + token }});
+        const data = await res.json();
+        if (!data.success) return;
+        readCounts = {};
+        data.reads.forEach(r => { readCounts[r.message_id] = r.read_count; });
+        updateAllMessageTicks();
+      } catch (err) { console.warn("fetchReadCounts error", err); }
+    }
+
+    /* -------------------------
+       Send message
+       ------------------------- */
+   async function sendMessage() {
+  // 🚫 Frontend hard block (no alert, no request)
+  if (adminOnlyChat && !amIAdmin) {
+    return;
+  }
+
+  const text = messageInput.value.trim();
+  if (!text) return;
+
+  try {
+    const res = await ChatAPI.sendMessage(groupId, {
+      message: text,
+      message_type: "text",
+      target: selectedTarget,
+      reply_to: replyingTo
+    });
+
+    if (res.success) {
+      messageInput.value = "";
+      selectedTarget = "all";
+      document.querySelector('[data-target="all"]')?.classList?.add('selected');
+      replyingTo = null;
+      document.getElementById("replyPreview").style.display = "none";
+    }
+
+    // ❌ NO alert here
+  } catch (err) {
+    console.warn("sendMessage blocked or failed", err);
+    // ❌ NO alert here
+  }
+}
+
+    sendBtn.addEventListener("click", sendMessage);
+    messageInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendMessage(); });
+document.getElementById("sendPollBtn").addEventListener("click", async () => {
+  const question = document.getElementById("pollQuestion").value.trim();
+  const options = [...document.querySelectorAll("#pollOptions input")]
+    .map(i => i.value.trim())
+    .filter(Boolean);
+
+  if (!question || options.length < 2) {
+    alert("Minimum 2 options required");
+    return;
+  }
+
+const res = await fetch(`${API_BASE}/chat/${groupId}/poll`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: "Bearer " + localStorage.getItem("unisync_token")
+  },
+  body: JSON.stringify({ question, options })
+});
+
+const data = await res.json();
+console.log("Poll response:", data);
+
+
+  pollPopup.style.display = "none";
+});
+
+    /* -------------------------
+       Groups + members + messages loaders
+       ------------------------- */
+    async function loadGroupDetails() {
+      try {
+        const res = await GroupsAPI.groupDetails(groupId);
+        if (res.success) {
+          groupNameEl.textContent = res.groupDetails.name;
+          adminOnlyChat = res.groupDetails.admin_only_chat === 1;
+
+
+          updateGroupAvatar(res.groupDetails.name);
+        }
+      } catch (err) { console.warn("loadGroupDetails error", err); }
+    }
+window.toggleMemberMenu = (userId) => {
+  document
+    .getElementById(`menu-${userId}`)
+    ?.classList.toggle("show");
+};
+
+window.removeMember = async (targetUserId) => {
+  if (!confirm("Remove this member from the group?")) return;
+
+  const res = await GroupsAPI.removeMember(groupId, targetUserId);
+
+  if (res.success) {
+    loadMembers(); // refresh members list
+  } else {
+    alert(res.message || "You are not allowed");
+  }
+};
+window.makeAdmin = async (targetUserId) => {
+  if (!confirm("Make this member an admin?")) return;
+
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/groups/${groupId}/make-admin/${targetUserId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("unisync_token")
+        }
+      }
+    );
+
+    const data = await res.json();
+
+    if (!data.success) {
+      alert(data.message || "Failed to make admin");
+      return;
+    }
+
+    alert("Member is now an admin");
+    loadMembers(); // refresh members list
+  } catch (err) {
+    console.error("makeAdmin error:", err);
+    alert("Something went wrong");
+  }
+};
+window.viewProfile = (userId) => {
+  window.location.href = `profile.html?userId=${userId}`;
+};
+window.removeAdmin = async (targetUserId) => {
+  if (!confirm("Remove admin rights from this member?")) return;
+
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/groups/${groupId}/remove-admin/${targetUserId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("unisync_token")
+        }
+      }
+    );
+
+    const data = await res.json();
+
+    if (!data.success) {
+      alert(data.message || "Action not allowed");
+      return;
+    }
+
+    alert("Admin rights removed");
+    loadMembers();
+  } catch (err) {
+    console.error("removeAdmin error", err);
+  }
+};
+
+async function loadMembers() {
+  try {
+    const res = await GroupsAPI.groupMembers(groupId);
+    if (!res.success) return;
+
+    totalMembers = res.members.length;
+
+    // detect if current user is admin
+    amIAdmin = res.members.some(
+      m => m.user_id === user.id && m.is_admin === 1
+    );
+const adminBox = document.getElementById("adminOnlyBox");
+if (amIAdmin) {
+  adminBox.style.display = "block";
+  document.getElementById("adminOnlyToggle").checked = adminOnlyChat;
+} else {
+  adminBox.style.display = "none";
+}
+
+    membersList.innerHTML = res.members.map(m => {
+      const adminBadge = m.is_admin
+        ? `<span class="badge admin">Admin</span>`
+        : "";
+
+      const statusDot = m.is_online ? "🟢" : "⚪";
+
+   const menu = (amIAdmin && m.user_id !== user.id)
+  ? `
+    <div class="member-menu">
+      <button onclick="toggleMemberMenu(${m.user_id})">⋮</button>
+      <div id="menu-${m.user_id}" class="menu-dropdown">
+
+        <div onclick="viewProfile(${m.user_id})">
+          View Profile
+        </div>
+
+        ${
+          m.is_admin
+            ? `<div onclick="removeAdmin(${m.user_id})">
+                 Cancel Admin
+               </div>`
+            : `<div onclick="makeAdmin(${m.user_id})">
+                 Make Admin
+               </div>`
+        }
+
+        <div class="danger" onclick="removeMember(${m.user_id})">
+          Remove Member
+        </div>
+
+      </div>
+    </div>
+  `
+  : "";
+
+
+      return `
+        <div class="member-row">
+          <div>
+            ${statusDot} <b>${escapeHtml(m.full_name)}</b> ${adminBadge}<br>
+            <span style="font-size:13px;color:var(--msg-time)">
+              ${escapeHtml(m.email || "")}
+            </span>
+          </div>
+          ${menu}
+        </div>
+      `;
+    }).join("");
+
+    if (res.members.length === 1) {
+      membersList.innerHTML = "<p>Only you.</p>";
+    }
+    applyAdminOnlyUI();   // ⭐ FINAL & REQUIRED ⭐
+
+  } catch (err) {
+    console.warn("loadMembers error", err);
+  }
+}
+
+
+
+    async function loadMessages() {
+      try {
+        const res = await ChatAPI.getMessages(groupId);
+        chatWindow.innerHTML = "";
+        lastRenderedDateLabel = "";
+
+        if (res.success) res.messages.forEach((msg) => appendMessage(msg, msg.sender_id === user.id));
+        scrollToBottom();
+        setTimeout(() => { initialLoad = false; }, 150);
+      } catch (err) { console.warn("loadMessages error", err); }
+    }
+
+    /* -------------------------
+       Online counter
+       ------------------------- */
+    async function updateOnlineCount() {
+      try {
+        const res = await fetch(`${API_BASE}/groups/${groupId}/online-count`, { headers: { "Authorization": "Bearer " + localStorage.getItem("unisync_token") }});
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById("onlineText").innerText = `${data.online} online`;
+        }
+      } catch (err) { /* ignore */ }
+    }
+
+    /* -------------------------
+       Filter menu UI
+       ------------------------- */
+    msgFilterBtn.addEventListener("click", () => msgFilterMenu.classList.toggle("show"));
+    document.querySelectorAll(".msg-filter-option").forEach(opt => {
+      opt.addEventListener("click", () => {
+        selectedTarget = opt.dataset.target;
+        msgFilterMenu.classList.remove("show");
+      });
+    });
+createPollBtn.addEventListener("click", () => {
+  msgFilterMenu.classList.remove("show");
+  pollPopup.style.display = "flex";
+});
+
+    /* -------------------------
+       Members popup / close
+       ------------------------- */
+    document.getElementById("membersBtn").addEventListener("click", () => { membersPopup.style.display = "flex"; loadMembers(); });
+    document.getElementById("closePopup").addEventListener("click", () => membersPopup.style.display = "none");
+
+    /* -------------------------
+       Exit group
+       ------------------------- */
+    document.getElementById("exitBtn").addEventListener("click", async () => {
+      if (!confirm("Are you sure you want to exit this group?")) return;
+      const result = await GroupsAPI.exitGroup(groupId);
+      if (result.success) { alert("You exited the group."); window.location.href = "groups.html"; }
+    });
+
+    /* -------------------------
+       Logout
+       ------------------------- */
+    document.getElementById("logoutBtn").addEventListener("click", () => AuthAPI.logout());
+
+    /* -------------------------
+       Preview close already defined above
+       ------------------------- */
+
+    /* -------------------------
+       Theme toggle (keeps consistent with assets/main.js)
+       ------------------------- */
+    document.getElementById("themeBtn").addEventListener("click", () => {
+      document.body.classList.toggle('dark');
+      const icon = document.getElementById("themeBtn").querySelector("i");
+      if (document.body.classList.contains('dark')) {
+        icon.className = 'fas fa-moon';
+        document.getElementById("themeBtn").innerHTML = '<i class="fas fa-moon"></i> Theme';
+      } else {
+        icon.className = 'fas fa-sun';
+        document.getElementById("themeBtn").innerHTML = '<i class="fas fa-sun"></i> Theme';
+      }
+    });
+// ================================
+// Admin-only toggle change handler
+// ================================
+document
+  .getElementById("adminOnlyToggle")
+  ?.addEventListener("change", async (e) => {
+    const enabled = e.target.checked;
+
+    await fetch(
+      `http://localhost:5000/api/groups/${groupId}/admin-only-chat`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("unisync_token")
+        },
+        body: JSON.stringify({ enabled })
+      }
+    );
+
+    adminOnlyChat = enabled;
+    applyAdminOnlyUI();
+  });
+function closePoll() {
+  pollPopup.style.display = "none";
+}
+window.closePoll = closePoll;
+
+document.getElementById("addPollOption").addEventListener("click", () => {
+  const box = document.getElementById("pollOptions");
+  if (box.children.length >= 5) return;
+
+  const input = document.createElement("input");
+  input.placeholder = `Option ${box.children.length + 1}`;
+  box.appendChild(input);
+});
+// ================================
+// Poll vote + voters toggle handler
+// ================================
+chatWindow.addEventListener("click", (e) => {
+
+  // 1️⃣ VOTE (button click)
+  const voteBtn = e.target.closest(".poll-option");
+  if (voteBtn) {
+    const pollBox = voteBtn.closest(".poll-box");
+    if (!pollBox) return;
+
+    socket.emit("vote_poll", {
+      poll_id: pollBox.dataset.poll,
+      option_id: voteBtn.dataset.opt
+    });
+    return;
+  }
+
+  // 2️⃣ SHOW / HIDE VOTERS (arrow click)
+  const caret = e.target.closest(".poll-caret");
+  if (caret) {
+    const pollBox = caret.closest(".poll-box");
+    if (!pollBox) return;
+
+    const voters = pollBox.querySelector(
+      `.poll-voters[data-opt="${caret.dataset.opt}"]`
+    );
+
+    if (voters) {
+      voters.classList.toggle("hidden");
+    }
+  }
+});
+chatWindow.addEventListener("click", (e) => {
+
+  // open / close dropdown
+  const actionBtn = e.target.closest(".msg-caret");
+
+  if (actionBtn) {
+    const menu = actionBtn.nextElementSibling;
+    menu.classList.toggle("hidden");
+    return;
+  }
+
+});
+// messageId -> emoji -> Set(userId)
+
+
+
+// ================================
+// MESSAGE REACTION (PERSISTENT)
+// ================================
+chatWindow.addEventListener("click", async (e) => {
+  const emoji = e.target.closest(".reaction-emoji");
+  if (!emoji) return;
+
+  const msg = emoji.closest(".msg");
+  if (!msg) return;
+
+  const msgId = msg.dataset.id;
+  const emojiChar = emoji.innerText;
+
+  await fetch(`${API_BASE}/chat/${msgId}/react`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + localStorage.getItem("unisync_token")
+    },
+    body: JSON.stringify({ emoji: emojiChar })
+  });
+
+  emoji.closest(".msg-action-menu")?.classList.add("hidden");
+});
+
+
+
+    /* -------------------------
+       INIT
+       ------------------------- */
+    (async () => {
+      // keep same start sequence as your working version
+      await loadGroupDetails();
+      await loadMembers();
+      await fetchReadCounts();
+      await loadMessages();
+      setInterval(updateOnlineCount, 3000);
+    })();
+
+    /* -------------------------
+       Utility: expose some functions for console debugging if needed
+       ------------------------- */
+    window.unisyncDebug = {
+      loadGroupDetails, loadMembers, loadMessages, fetchReadCounts, sendMessage
+    };
+
+
+  </script>
+
+  <!-- keep main.js for theme persistence if you want (safe to include) -->
+  <script src="assets/main.js"></script>
+</body>
+</html>

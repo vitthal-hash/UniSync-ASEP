@@ -1,0 +1,1633 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UniSync — Profile</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/dashboard-style.css" />
+  <!-- Profile specific styles -->
+  <style>
+    :root {
+      --primary-color: #6366f1;
+      --primary-light: #818cf8;
+      --primary-dark: #4f46e5;
+      --secondary-color: #10b981;
+      --accent-color: #f59e0b;
+      --danger-color: #ef4444;
+      --warning-color: #f59e0b;
+      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+   .dashboard-container {
+      display: flex;
+      min-height: 100vh;     /* allow page to grow */
+      height: auto;          /* remove forced height */
+      overflow: visible;     /* allow natural scrolling */
+      background: transparent !important;
+      position: relative;
+}
+
+
+    .dashboard-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover;
+      opacity: 0.05;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 2rem;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .logo i {
+      color: var(--primary-light);
+      animation: spin 10s linear infinite;
+    }
+
+    .logo span {
+      color: white;
+    }
+
+    .logo span span {
+      color: var(--primary-light);
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+    }
+
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.9rem 1rem;
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar nav a:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+
+    .sidebar nav a.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .sidebar nav a.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--primary-light);
+      border-radius: 0 4px 4px 0;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+     
+      border-radius: 24px 0 0 24px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: -20px 0 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .welcome-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      padding: 2rem;
+      border-radius: 0 0 24px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .welcome-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover;
+      opacity: 0.1;
+    }
+
+    .user-greeting h1 {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+      animation: slideInDown 0.8s ease;
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      animation: slideInUp 0.8s ease 0.2s both;
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 0.9;
+        transform: translateY(0);
+      }
+    }
+
+    .content-wrapper {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+   background: transparent !important;
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 2rem;
+    }
+
+    /* Profile Form Card */
+    .profile-form-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      animation: fadeIn 0.6s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .profile-form-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 2rem;
+    }
+
+    .card-header i {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      background: rgba(99, 102, 241, 0.1);
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-header h2 {
+      font-size: 1.5rem;
+      color: #1e293b;
+      margin: 0;
+    }
+
+    /* Form Grid */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #475569;
+      font-size: 0.95rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      font-size: 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      background: white;
+      color: #1e293b;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .form-control:disabled {
+      background: #f8fafc;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+
+    .form-control[multiple] {
+      min-height: 150px;
+      padding: 0.5rem;
+    }
+
+    .form-control[multiple] option {
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .form-control[multiple] option:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .form-control[multiple] option:checked {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    /* Section Headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 2rem 0 1rem 0;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #e2e8f0;
+      color: #1e293b;
+    }
+
+    .section-header i {
+      color: var(--primary-color);
+    }
+
+    /* Permission Tags */
+    .permission-tags {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .permission-tag {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .permission-tag.allowed {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .permission-tag.not-allowed {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Profile Sidebar */
+    .profile-sidebar {
+      animation: slideInRight 0.8s ease 0.3s both;
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .user-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      margin-bottom: 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .user-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .avatar-large {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .user-name {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+
+    .user-email {
+      color: #64748b;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .user-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .user-stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    /* Info Card */
+    .info-card {
+      background: white;
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      margin-bottom: 1.5rem;
+      animation: slideInUp 0.6s ease 0.4s both;
+    }
+
+    .info-card h3 {
+      color: #1e293b;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-card h3 i {
+      color: var(--primary-color);
+    }
+
+    .info-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #e2e8f0;
+      color: #475569;
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-value {
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    /* Save Button */
+    .save-btn {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      margin-top: 1rem;
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+    }
+
+    .save-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(99, 102, 241, 0.4);
+    }
+
+    .save-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Messages */
+    #error, #success {
+      padding: 1rem;
+      border-radius: 12px;
+      margin-top: 1rem;
+      display: none;
+      animation: slideInUp 0.3s ease;
+    }
+
+    #error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    #success {
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .content-wrapper {
+        grid-template-columns: 1fr;
+      }
+      
+      .profile-sidebar {
+        order: -1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 80px;
+        padding: 1rem;
+      }
+      
+      .logo span,
+      .sidebar nav a span {
+        display: none;
+      }
+      
+      .sidebar nav a {
+        justify-content: center;
+        padding: 1rem;
+      }
+      
+      .main-content {
+        border-radius: 0;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-group.full-width {
+        grid-column: span 1;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .content-wrapper {
+        padding: 1rem;
+      }
+      
+      .profile-form-card,
+      .user-card,
+      .info-card {
+        padding: 1.5rem;
+      }
+      
+      .user-stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+      }
+    }
+
+    /* Dark Theme Support */
+    body.dark .main-content {
+      background: #1e293b;
+    }
+
+    body.dark .profile-form-card,
+    body.dark .user-card,
+    body.dark .info-card {
+      background: #334155;
+      border-color: #475569;
+    }
+
+    body.dark .card-header h2,
+    body.dark label,
+    body.dark .user-name,
+    body.dark .info-card h3,
+    body.dark .info-value {
+      color: #f1f5f9;
+    }
+
+    body.dark .form-control {
+      background-color: #334155;
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+
+    body.dark .form-control:disabled {
+      background: #475569;
+      color: #94a3b8;
+    }
+
+    body.dark .section-header {
+      color: #f1f5f9;
+      border-bottom-color: #475569;
+    }
+
+    body.dark .info-item {
+      border-bottom-color: #475569;
+      color: #cbd5e1;
+    }
+
+    body.dark .user-email,
+    body.dark .stat-label {
+      color: #94a3b8;
+    }
+    /* Make multi-select options clearly visible on white background */
+.form-control[multiple] {
+  color: #1e293b !important;
+  background: #ffffff !important;
+}
+
+.form-control[multiple] option {
+  color: #1e293b !important;
+  background: #ffffff !important;
+}
+
+.form-control[multiple] option:checked {
+  background: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+/* ---------- FORCE SIDEBAR ALWAYS BLACK ---------- */
+.sidebar {
+    background: #000 !important;     /* solid black */
+    backdrop-filter: none !important;
+    border-right: none !important;
+}
+
+/* ---------- SIDEBAR TEXT ALWAYS WHITE ---------- */
+.sidebar nav a,
+.sidebar nav a i,
+.sidebar nav a span,
+.logo,
+.logo span,
+.logo i {
+    color: #fff !important;
+}
+
+/* ---------- KEEP HOVER FROM CHANGING BACKGROUND ---------- */
+.sidebar nav a:hover {
+    background: rgba(255,255,255,0.1) !important; /* subtle highlight */
+    color: #fff !important;                       /* still white text */
+    transform: none !important;                   /* stop slide effect */
+}
+
+/* ---------- ACTIVE ITEM ALSO WHITE TEXT ---------- */
+.sidebar nav a.active,
+.sidebar nav a.active i,
+.sidebar nav a.active span {
+    color: #fff !important;
+    background: rgba(255,255,255,0.15) !important;
+}
+/* --- Full-screen blurred background image --- */
+body {
+    background: url('https://images.pexels.com/photos/6405694/pexels-photo-6405694.jpeg?cs=srgb&dl=pexels-taryn-elliott-6405694.jpg&fm=jpg') center/cover no-repeat fixed;
+}
+
+/* Blur the background ONLY — cards stay sharp */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    backdrop-filter: blur(0px);       /* blur amount */
+    -webkit-backdrop-filter: blur(0px);
+    z-index: -1;
+}
+/* ============================================
+   FORCE VISIBLE TEXT IN EDITABLE INPUT FIELDS
+   ============================================ */
+
+/* Light Mode – Inputs user can edit */
+.form-control:not(:disabled) {
+    color: #000 !important;       /* strong black text */
+    background: #ffffff !important;
+}
+
+/* Light Mode – Multiselect options */
+.form-control[multiple] option {
+    color: #000 !important;
+    background: #ffffff !important;
+}
+
+/* Selected options in light mode */
+.form-control[multiple] option:checked {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+/* ============================================
+   DARK MODE — INPUTS SHOULD BE WHITE TEXT
+   ============================================ */
+body.dark .form-control:not(:disabled) {
+    color: #ffffff !important;
+    background: #1e293b !important;     /* deep dark grey */
+    border-color: #475569 !important;
+}
+
+body.dark .form-control[multiple] option {
+    color: #ffffff !important;
+    background: #1e293b !important;
+}
+
+body.dark .form-control[multiple] option:checked {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+  </style>
+</head>
+
+<body class="dashboard-page">
+  <script type="module">
+    import { requireLogin } from "./assets/api.js";
+    requireLogin();
+  </script>
+
+  <div class="dashboard-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <i class="fas fa-sync-alt"></i>
+        <span>Uni<span>Sync</span></span>
+      </div>
+
+      <nav>
+        <a href="dashboard.html">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </a>
+        <a href="groups.html">
+          <i class="fas fa-users"></i>
+          <span>Groups</span>
+        </a>
+        <a href="matching.html">
+          <i class="fas fa-heart"></i>
+          <span>Matching</span>
+        </a>
+        <a href="analytics.html">
+          <i class="fas fa-chart-line"></i>
+          <span>Analytics</span>
+        </a>
+        <a href="profile.html" class="active">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="themeBtn" class="theme-btn">
+          <i class="fas fa-moon"></i> Theme
+        </button>
+        <button id="logoutBtn" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <!-- Welcome Header -->
+      <header class="welcome-header">
+        <div class="user-greeting">
+          <h1 id="welcomeText">Your Profile Settings</h1>
+          <p class="subtitle">Manage your personal information and preferences</p>
+        </div>
+      </header>
+
+      <!-- Main Content Area -->
+      <div class="content-wrapper">
+        <!-- Profile Form Card -->
+        <div class="profile-form-card">
+          <div class="card-header">
+            <i class="fas fa-user-edit"></i>
+            <h2>Edit Profile Information</h2>
+          </div>
+
+          <form id="profileForm">
+            <!-- Basic Information Section -->
+            <div class="section-header">
+              <i class="fas fa-id-card"></i>
+              <h3>Basic Information</h3>
+            </div>
+            
+            <div class="form-grid">
+              <!-- Full Name -->
+              <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" class="form-control" required />
+                <div class="permission-tags">
+                  <span class="permission-tag allowed">Allowed to edit</span>
+                </div>
+              </div>
+
+              <!-- Email (Read-only) -->
+              <div class="form-group">
+                <label>Email Address</label>
+                <input type="text" class="form-control" id="emailDisplay" disabled />
+                <div class="permission-tags">
+                  <span class="permission-tag not-allowed">Cannot be changed</span>
+                </div>
+              </div>
+
+              <!-- Branch (Disabled) -->
+              <div class="form-group">
+                <label for="branch">Branch</label>
+                <select id="branch" class="form-control" disabled>
+                  <option>Computer Engineering</option>
+                  <option>Information Technology</option>
+                  <option>Electronics Engineering</option>
+                  <option>Electrical Engineering</option>
+                  <option>Mechanical Engineering</option>
+                  <option>Civil Engineering</option>
+                </select>
+                <div class="permission-tags">
+                  <span class="permission-tag not-allowed">Cannot be changed</span>
+                </div>
+              </div>
+
+              <!-- Year (Disabled) -->
+              <div class="form-group">
+                <label for="year">Year</label>
+                <select id="year" class="form-control" disabled>
+                  <option>FE</option>
+                  <option>SE</option>
+                  <option>TE</option>
+                  <option>BE</option>
+                </select>
+                <div class="permission-tags">
+                  <span class="permission-tag not-allowed">Cannot be changed</span>
+                </div>
+              </div>
+
+              <!-- Division (Disabled) -->
+              <div class="form-group">
+                <label for="division">Division</label>
+                <input type="text" id="division" class="form-control" disabled />
+                <div class="permission-tags">
+                  <span class="permission-tag not-allowed">Cannot be changed</span>
+                </div>
+              </div>
+<div class="form-group">
+  <label for="batch">Batch</label>
+  <select id="batch" class="form-control">
+  <option value="">Select Batch</option>
+  <option value="1">Batch 1</option>
+  <option value="2">Batch 2</option>
+  <option value="3">Batch 3</option>
+</select>
+  <div class="permission-tags">
+    <span class="permission-tag not-allowed">Cannot be changed</span>
+  </div>
+</div>
+
+              <!-- Gender (Disabled) -->
+              <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" class="form-control" disabled>
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+                <div class="permission-tags">
+                  <span class="permission-tag not-allowed">Cannot be changed</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Academic Details Section -->
+            <div class="section-header">
+              <i class="fas fa-graduation-cap"></i>
+              <h3>Academic Details</h3>
+            </div>
+            
+            <div class="form-grid">
+              <!-- Roll Number -->
+              <div class="form-group">
+                <label for="roleNumber">Roll Number</label>
+                <input type="text" id="roleNumber" class="form-control" required />
+                <div class="permission-tags">
+                  <span class="permission-tag allowed">Allowed to edit</span>
+                </div>
+              </div>
+
+              <!-- PRN Number -->
+              <div class="form-group">
+                <label for="prnNumber">PRN Number</label>
+                <input type="text" id="prnNumber" class="form-control" required />
+                <div class="permission-tags">
+                  <span class="permission-tag allowed">Allowed to edit</span>
+                </div>
+              </div>
+
+              <!-- CGPA -->
+              <div class="form-group">
+                <label for="cgpa">CGPA (optional)</label>
+                <input type="number" id="cgpa" class="form-control" step="0.01" min="0" max="10" />
+                <div class="permission-tags">
+                  <span class="permission-tag allowed">Allowed to edit</span>
+                </div>
+              </div>
+
+              <!-- City -->
+              <div class="form-group">
+                <label for="city">City</label>
+                <input type="text" id="city" class="form-control" required />
+                <div class="permission-tags">
+                  <span class="permission-tag allowed">Allowed to edit</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Skills & Interests Section -->
+            <div class="section-header">
+              <i class="fas fa-star"></i>
+              <h3>Skills & Interests</h3>
+            </div>
+            
+            <div class="form-grid">
+              <!-- Skills -->
+              <div class="form-group full-width">
+                <label for="skills">Skills (Multiple Selection)</label>
+                <select id="skills" class="form-control" multiple>
+                  <option>Programming</option>
+                  <option>Data Analysis</option>
+                  <option>CAD Design</option>
+                  <option>Circuit Design</option>
+                  <option>Simulation Tools</option>
+                  <option>Technical Drawing</option>
+                  <option>Web Development</option>
+                  <option>App Development</option>
+                  <option>Embedded Systems</option>
+                  <option>AI / ML</option>
+                  <option>Cybersecurity</option>
+                  <option>Cloud Computing</option>
+                  <option>Mechanical Design</option>
+                  <option>Civil Planning</option>
+                  <option>Electrical Systems</option>
+                  <option>Project Management</option>
+                  <option>Research & Documentation</option>
+                  <option>Problem Solving</option>
+                  <option>Communication</option>
+                  <option>Teamwork</option>
+                </select>
+                <div class="permission-tags">
+                  <span class="permission-tag allowed">Hold Ctrl/Cmd to select multiple</span>
+                </div>
+              </div>
+
+              <!-- Interests -->
+              <div class="form-group full-width">
+                <label for="interests">Interests (Multiple Selection)</label>
+                <select id="interests" class="form-control" multiple>
+                  <option>Coding</option>
+                  <option>Robotics</option>
+                  <option>AI / ML</option>
+                  <option>IoT</option>
+                  <option>Automobile</option>
+                  <option>Aerospace</option>
+                  <option>Architecture</option>
+                  <option>Research</option>
+                  <option>Painting</option>
+                  <option>Sketching</option>
+                  <option>Digital Art</option>
+                  <option>Photography</option>
+                  <option>Video Editing</option>
+                  <option>Singing</option>
+                  <option>Dancing</option>
+                  <option>Writing</option>
+                  <option>Cricket</option>
+                  <option>Football</option>
+                  <option>Badminton</option>
+                  <option>Gym / Fitness</option>
+                  <option>Swimming</option>
+                  <option>Cycling</option>
+                  <option>Trekking</option>
+                  <option>Yoga</option>
+                  <option>Riding Bikes</option>
+                  <option>Long Drives</option>
+                  <option>Traveling</option>
+                  <option>Cooking</option>
+                  <option>Reading</option>
+                  <option>Movies / Shows</option>
+                  <option>Gaming</option>
+                  <option>Meditation</option>
+                  <option>Volunteering</option>
+                  <option>Event Management</option>
+                  <option>Public Speaking</option>
+                  <option>Entrepreneurship</option>
+                  <option>Content Creation</option>
+                </select>
+                <div class="permission-tags">
+                  <span class="permission-tag allowed">Hold Ctrl/Cmd to select multiple</span>
+                </div>
+              </div>
+
+              <!-- Programming Languages -->
+              <div class="form-group full-width">
+                <label for="languages">Programming Languages (Multiple Selection)</label>
+                <select id="languages" class="form-control" multiple>
+                  <option>C</option>
+                  <option>C++</option>
+                  <option>Java</option>
+                  <option>Python</option>
+                  <option>JavaScript</option>
+                  <option>TypeScript</option>
+                  <option>HTML</option>
+                  <option>CSS</option>
+                  <option>PHP</option>
+                  <option>SQL</option>
+                  <option>R</option>
+                  <option>MATLAB</option>
+                  <option>Assembly</option>
+                  <option>Verilog</option>
+                  <option>VHDL</option>
+                  <option>Embedded C</option>
+                  <option>Kotlin</option>
+                  <option>Swift</option>
+                  <option>Dart</option>
+                  <option>Go</option>
+                  <option>Rust</option>
+                </select>
+                
+                 <div class="permission-tags">
+                  <span class="permission-tag allowed">Hold Ctrl/Cmd to select multiple</span>
+                </div>
+              <br><BR>
+                <div class="form-group full-width">
+  <label for="clubs">Clubs (optional)</label>
+  <select id="clubs" class="form-control" multiple>
+
+    
+
+    <option>Dean’s Message</option>
+    <option>Microsoft Learn Student Club</option>
+    <option>Team Endurance Racing</option>
+    <option>GedIT Coding Club</option>
+    <option>Ekasutram</option>
+    <option>Google Developer Student Clubs</option>
+    <option>ISA VIT, PUNE</option>
+    <option>Team Griffin India</option>
+    <option>CSI VIT, Pune</option>
+    <option>Team Vishwanetrutvam</option>
+    <option>Team Veloce Racing</option>
+    <option>Club Catalyst</option>
+    <option>Game Dev +</option>
+    <option>IEEE VIT, Pune</option>
+    <option>CHESA</option>
+    <option>TRF – The Robotics Forum</option>
+    <option>Reality Spectra</option>
+    <option>Team Quark</option>
+    <option>Reports</option>
+    <option>Personality Development Club</option>
+    <option>Indus Connect</option>
+    <option>InnovSphere</option>
+    <option>Pi Editorial Board</option>
+    <option>Antariksh Club of VI</option>
+    <option>EPEC</option>
+    <option>SW & D</option>
+    <option>Light-hearted Lounge</option>
+    <option>C-Cube</option>
+    <option>RangManch</option>
+    <option>Abhivridhhi</option>
+    <option>Team Eklavya</option>
+    <option>The Investment Forum</option>
+    <option>VEDC</option>
+    <option>Speaker’s Club</option>
+
+  </select>
+
+  
+
+  <div class="permission-tags">
+    <span class="permission-tag allowed">Optional – editable anytime</span>
+  </div>
+</div>
+
+                <div class="permission-tags">
+                  <span class="permission-tag allowed">Hold Ctrl/Cmd to select multiple</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Button -->
+            <button id="saveBtn" type="submit" class="save-btn">
+              <i class="fas fa-save"></i>
+              <span>Save Profile Changes</span>
+            </button>
+
+            <!-- Messages -->
+            <div id="error"></div>
+            <div id="success"></div>
+          </form>
+        </div>
+
+        <!-- Profile Sidebar -->
+        <div class="profile-sidebar">
+          <!-- User Card -->
+          <div class="user-card">
+            <div class="avatar-large" id="userAvatar">JD</div>
+            <h2 class="user-name" id="displayName">John Doe</h2>
+            <p class="user-email" id="displayEmail">john@example.com</p>
+            
+            <div class="user-stats">
+              <div class="user-stat">
+                <span class="stat-number" id="skillCount">0</span>
+                <span class="stat-label">Skills</span>
+              </div>
+              <div class="user-stat">
+                <span class="stat-number" id="interestCount">0</span>
+                <span class="stat-label">Interests</span>
+              </div>
+              <div class="user-stat">
+                <span class="stat-number" id="languageCount">0</span>
+                <span class="stat-label">Languages</span>
+              </div>
+              
+            </div>
+          </div>
+
+          <!-- Edit Permissions Card -->
+          <div class="info-card">
+            <h3><i class="fas fa-edit"></i> Edit Permissions</h3>
+            <ul class="info-list">
+              <li class="info-item">
+                <span>Allowed to edit:</span>
+                <span class="info-value">Full Name</span>
+              </li>
+              <li class="info-item">
+                <span>Allowed to edit:</span>
+                <span class="info-value">Roll Number</span>
+              </li>
+              <li class="info-item">
+                <span>Allowed to edit:</span>
+                <span class="info-value">PRN Number</span>
+              </li>
+              <li class="info-item">
+                <span>Allowed to edit:</span>
+                <span class="info-value">CGPA</span>
+              </li>
+              <li class="info-item">
+                <span>Allowed to edit:</span>
+                <span class="info-value">City</span>
+              </li>
+              <li class="info-item">
+                <span>Allowed to edit:</span>
+                <span class="info-value">Skills, Interests & Languages</span>
+              </li>
+              <li class="info-item">
+                <span>Not allowed to edit:</span>
+                <span class="info-value">Branch, Year, Division, Gender</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Profile Completion Card -->
+          <div class="info-card">
+            <h3><i class="fas fa-tasks"></i> Profile Completion</h3>
+            <div style="margin: 1rem 0;">
+              <div style="background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">
+                <div id="completionBar" style="background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); height: 100%; width: 0%; transition: width 1s ease;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
+                <span style="color: #475569; font-size: 0.9rem;">Profile Complete</span>
+                <span style="color: var(--primary-color); font-weight: 600;" id="completionPercent">0%</span>
+              </div>
+            </div>
+            <ul class="info-list">
+              <li class="info-item">
+                <span>Complete Profile:</span>
+                <span class="info-value" id="completionStatus">Incomplete</span>
+              </li>
+              <li class="info-item">
+                <span>Last Updated:</span>
+                <span class="info-value" id="lastUpdated">Just now</span>
+              </li>
+              <li class="info-item">
+                <span>Account Created:</span>
+                <span class="info-value" id="accountCreated">--</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- JS -->
+  <script type="module">
+    import { ProfileAPI, AuthAPI } from "./assets/api.js";
+document.querySelectorAll(".sidebar nav a").forEach(link => {
+  link.addEventListener("click", () => {
+    // remove userId from URL when navigating
+    window.history.replaceState({}, "", "profile.html");
+  });
+});
+
+    const fullName = document.getElementById("fullName");
+    const branch = document.getElementById("branch");
+    const year = document.getElementById("year");
+    const division = document.getElementById("division");
+    const batch = document.getElementById("batch");
+    const cgpa = document.getElementById("cgpa");
+    const roleNumber = document.getElementById("roleNumber");
+    const prnNumber = document.getElementById("prnNumber");
+    const city = document.getElementById("city");
+    const gender = document.getElementById("gender");
+    const emailDisplay = document.getElementById("emailDisplay");
+
+    const skills = document.getElementById("skills");
+    const interests = document.getElementById("interests");
+    const languages = document.getElementById("languages");
+const clubs = document.getElementById("clubs");
+
+    const errorEl = document.getElementById("error");
+    const successEl = document.getElementById("success");
+    const saveBtn = document.getElementById("saveBtn");
+
+    // Display elements
+    const displayName = document.getElementById("displayName");
+    const displayEmail = document.getElementById("displayEmail");
+    const userAvatar = document.getElementById("userAvatar");
+    const skillCount = document.getElementById("skillCount");
+    const interestCount = document.getElementById("interestCount");
+    const languageCount = document.getElementById("languageCount");
+    const completionBar = document.getElementById("completionBar");
+    const completionPercent = document.getElementById("completionPercent");
+    const completionStatus = document.getElementById("completionStatus");
+    const lastUpdated = document.getElementById("lastUpdated");
+    const accountCreated = document.getElementById("accountCreated");
+const params = new URLSearchParams(window.location.search);
+const viewedUserId = params.get("userId");
+const isViewingOtherUser = !!viewedUserId;
+    function setMultiple(selectEl, arr) {
+      Array.from(selectEl.options).forEach(opt => {
+        opt.selected = arr.includes(opt.value);
+      });
+    }
+
+    function updateProfileCompletion(profile) {
+      let completion = 0;
+      const totalFields = 12; // Number of important fields
+      let filledFields = 0;
+
+      // Check required fields
+      if (profile.full_name && profile.full_name.trim()) filledFields++;
+      if (profile.branch) filledFields++;
+      if (profile.year) filledFields++;
+      if (profile.division && profile.division.trim()) filledFields++;
+      if (profile.role_number && profile.role_number.trim()) filledFields++;
+      if (profile.prn_number && profile.prn_number.trim()) filledFields++;
+      if (profile.city && profile.city.trim()) filledFields++;
+      if (profile.gender) filledFields++;
+      if (profile.skills && profile.skills.length > 0) filledFields++;
+      if (profile.interests && profile.interests.length > 0) filledFields++;
+      if (profile.languages && profile.languages.length > 0) filledFields++;
+      if (profile.cgpa) filledFields++;
+
+      completion = Math.round((filledFields / totalFields) * 100);
+      
+      // Update UI
+      completionBar.style.width = `${completion}%`;
+      completionPercent.textContent = `${completion}%`;
+      completionStatus.textContent = completion >= 80 ? 'Complete' : completion >= 50 ? 'Moderate' : 'Incomplete';
+      completionStatus.style.color = completion >= 80 ? '#10b981' : completion >= 50 ? '#f59e0b' : '#ef4444';
+    }
+
+    function updateDisplayStats(profile) {
+      // Update counts
+      skillCount.textContent = profile.skills ? profile.skills.length : 0;
+      interestCount.textContent = profile.interests ? profile.interests.length : 0;
+      languageCount.textContent = profile.languages ? profile.languages.length : 0;
+      
+      // Update avatar
+      if (profile.full_name) {
+        const initials = profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        userAvatar.textContent = initials;
+      }
+    }
+
+    // -------------------------
+    // Load profile
+    // -------------------------
+    async function loadProfile() {
+   const params = new URLSearchParams(window.location.search);
+const viewedUserId = params.get("userId");
+
+let res;
+
+if (viewedUserId) {
+  // admin viewing someone else's profile
+  const token = localStorage.getItem("unisync_token");
+  const response = await fetch(`http://localhost:5000/api/profile/${viewedUserId}`, {
+    headers: {
+      Authorization: "Bearer " + token
+    }
+  });
+  res = await response.json();
+} else {
+  // normal user viewing own profile
+  res = await ProfileAPI.getMyProfile();
+}
+
+
+      if (!res.success) {
+        errorEl.textContent = "Unable to load profile.";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      const u = res.profile;
+      // 🔧 Normalize arrays (handles string or array)
+u.skills = Array.isArray(u.skills)
+  ? u.skills
+  : (typeof u.skills === "string" && u.skills.length)
+    ? u.skills.split(",").map(s => s.trim())
+    : [];
+
+u.interests = Array.isArray(u.interests)
+  ? u.interests
+  : (typeof u.interests === "string" && u.interests.length)
+    ? u.interests.split(",").map(s => s.trim())
+    : [];
+
+u.languages = Array.isArray(u.languages)
+  ? u.languages
+  : (typeof u.languages === "string" && u.languages.length)
+    ? u.languages.split(",").map(s => s.trim())
+    : [];
+u.clubs = Array.isArray(u.clubs)
+  ? u.clubs
+  : (typeof u.clubs === "string" && u.clubs.length)
+    ? u.clubs.split(",").map(c => c.trim())
+    : [];
+
+if (viewedUserId) {
+  // Disable normal inputs
+  document
+    .getElementById("profileForm")
+    .querySelectorAll("input:not([multiple]), select:not([multiple]), textarea")
+    .forEach(el => el.disabled = true);
+
+  // Multi-selects: visible, scrollable, read-only
+  [skills, interests, languages].forEach(select => {
+    select.disabled = false; // must stay enabled to render selections
+
+    // Prevent changes but allow scroll
+    select.addEventListener("change", () => {
+      setMultiple(select, u[select.id]); // reset to original values
+    });
+  
+  });
+
+  // Hide save button
+  saveBtn.style.display = "none";
+}
+
+
+
+
+      // Set form values
+      fullName.value = u.full_name || "";
+      branch.value = u.branch || "";
+      year.value = u.year || "";
+      division.value = u.division || "";
+batch.value = u.batch || "";
+
+// ✅ CORRECT RULE:
+// Disable ONLY if user is already in a batch group
+if (u.hasBatchGroup) {
+  batch.disabled = true;    // already in batch → lock
+} else {
+  batch.disabled = false;   // not in batch → allow selection
+}
+
+
+      cgpa.value = u.cgpa || "";
+      roleNumber.value = u.role_number || "";
+      prnNumber.value = u.prn_number || "";
+      city.value = u.city || "";
+      gender.value = u.gender || "";
+      
+      // Get user email from localStorage
+      emailDisplay.value = u.email || "";
+
+
+      // Set multiple select values
+      setMultiple(skills, u.skills || []);
+      setMultiple(interests, u.interests || []);
+      setMultiple(languages, u.languages || []);
+setMultiple(clubs, u.clubs);
+
+      // Update display
+    displayName.textContent = u.full_name || "User";
+displayEmail.textContent = u.email || "";
+
+      
+      updateDisplayStats(u);
+      updateProfileCompletion(u);
+      
+      // Set timestamps (simulated)
+      lastUpdated.textContent = "Just now";
+     if (u.created_at) {
+  accountCreated.textContent = new Date(u.created_at).toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric'
+  });
+} else {
+  accountCreated.textContent = "--";
+}
+
+    }
+
+    // -------------------------
+    // Save profile
+    // -------------------------
+    function getSelected(selectEl) {
+      return Array.from(selectEl.selectedOptions).map(o => o.value);
+    }
+
+  document.getElementById("profileForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  if (isViewingOtherUser) {
+    // absolutely nothing should happen
+    return;
+  }
+
+
+      e.preventDefault();
+      errorEl.style.display = "none";
+      successEl.style.display = "none";
+
+      const payload = {
+        full_name: fullName.value.trim(),
+        branch: branch.value,
+        year: year.value,
+        division: division.value.trim(),
+        cgpa: cgpa.value ? parseFloat(cgpa.value) : null,
+       batch: batch.value || null,
+        role_number: roleNumber.value.trim(),
+        prn_number: prnNumber.value.trim(),
+        city: city.value.trim(),
+        gender: gender.value,
+        skills: getSelected(skills),
+        interests: getSelected(interests),
+        languages: getSelected(languages),
+        clubs: getSelected(clubs)
+
+      };
+
+      // Validation
+      if (!payload.full_name) {
+        errorEl.textContent = "Full name is required";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      if (!payload.role_number) {
+        errorEl.textContent = "Roll number is required";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      if (!payload.prn_number) {
+        errorEl.textContent = "PRN number is required";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      if (!payload.city) {
+        errorEl.textContent = "City is required";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving...</span>';
+
+      const res = await ProfileAPI.updateProfile(payload);
+
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="fas fa-save"></i><span>Save Profile Changes</span>';
+
+      if (!res.success) {
+        errorEl.textContent = res.message || "Failed to update profile.";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      successEl.textContent = "Profile updated successfully!";
+      successEl.style.display = "block";
+
+      // Update local storage user's name
+     // Update localStorage ONLY when editing own profile
+
+
+if (!isViewingOtherUser) {
+  const localUser = JSON.parse(localStorage.getItem("unisync_user") || "{}");
+  localUser.full_name = payload.full_name;
+  localStorage.setItem("unisync_user", JSON.stringify(localUser));
+}
+
+
+
+      // Update display
+     if (!new URLSearchParams(window.location.search).get("userId")) {
+  displayName.textContent = payload.full_name;
+}
+      if (!isViewingOtherUser) {
+  updateDisplayStats(payload);
+  updateProfileCompletion(payload);
+}
+
+      lastUpdated.textContent = "Just now";
+
+      // Scroll to success message
+      successEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    // -------------------------
+    // Theme toggle
+    // -------------------------
+    document.addEventListener('DOMContentLoaded', () => {
+      const themeBtn = document.getElementById('themeBtn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+          document.body.classList.toggle('dark');
+          const icon = themeBtn.querySelector('i');
+          if (document.body.classList.contains('dark')) {
+            icon.className = 'fas fa-sun';
+            themeBtn.innerHTML = '<i class="fas fa-sun"></i> Light';
+          } else {
+            icon.className = 'fas fa-moon';
+            themeBtn.innerHTML = '<i class="fas fa-moon"></i> Dark';
+          }
+        });
+      }
+
+      // Logout
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          AuthAPI.logout();
+        });
+      }
+
+      // Welcome text
+   const welcomeText = document.getElementById("welcomeText");
+
+if (isViewingOtherUser) {
+  welcomeText.textContent = "Viewing Member Profile";
+} else {
+  const user = JSON.parse(localStorage.getItem("unisync_user") || "{}");
+  welcomeText.textContent = user.full_name
+    ? `Welcome, ${user.full_name.split(" ")[0]}!`
+    : "Your Profile Settings";
+}
+    });
+
+    // Initialize
+    loadProfile();
+  </script>
+
+  <script src="assets/main.js"></script>
+</body>
+</html>

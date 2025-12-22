@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UniSync — Login</title>
+
+  <!-- auth-specific CSS (new) -->
+  <link rel="stylesheet" href="assets/auth.css" />
+
+  <!-- keep global styles if you want consistent components -->
+  <link rel="stylesheet" href="assets/styles.css" />
+  
+</head>
+
+<body class="auth-page">
+  <!-- NAVBAR (same structure as homepage) -->
+   <div class="global-anim-bg">
+    <canvas id="bgMesh"></canvas>
+    <canvas id="bgFlow"></canvas>
+    <canvas id="bgParticles"></canvas>
+</div>
+
+ 
+
+  <nav class="top-nav">
+    <div class="nav-left">
+      <a href="index2.html" class="logo">
+        <span class="sync-icon">⟳</span>
+        <span class="brand">Uni<span>sync</span></span>
+      </a>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="index2.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="features.html">Features</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="index.html" class="btn small outline">Login</a>
+      <a href="register_email.html" class="btn small primary">Join Now</a>
+    </div>
+  </nav>
+
+  <main class="auth-container">
+    <!-- LEFT: large heading + decorative background -->
+    <section class="auth-left">
+      <div class="hero-copy">
+        <h1>Welcome back to <span>UniSync</span></h1>
+        <p class="lead">Your campus companion — messages, analytics and collaborative tools tailored for institutions.</p>
+        <p class="muted">Secure sign-in to access your dashboard, groups and analytics.</p>
+      </div>
+
+      <!-- decorative blurred image (you can replace image path with your footer or campus image later) -->
+     
+    </section>
+
+    <!-- RIGHT: the login card (tall & narrow) -->
+    <aside class="auth-right">
+      <div class="card auth-card">
+        <h2>Login</h2>
+
+        <!-- KEEP the exact same form fields and IDs as your original login file -->
+        <form id="loginForm" autocomplete="off">
+          <label for="email">College Email</label>
+          <input type="email" id="email" placeholder="you@college.edu" required />
+
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password" required />
+
+          <div class="actions">
+            <button type="submit" id="loginBtn">Login</button>
+            <button type="button" id="demoBtn" class="secondary-btn">Demo</button>
+          </div>
+
+          <p id="error" class="error-msg" style="display:none"></p>
+        </form>
+
+        <p class="small muted">
+          Don't have an account?
+          <a href="register_email.html" class="link">Register here</a>
+        </p>
+      </div>
+
+      <footer class="auth-footer">
+        © UniSync
+      </footer>
+    </aside>
+  </main>
+
+  <!-- FOOTER (full footer like homepage) -->
+  <footer class="global-footer">
+    <div class="footer-grid">
+      <div class="col">
+        <h4>Unisync</h4>
+        <p>Revolutionizing college communication and analysis through innovative technology solutions.</p>
+      </div>
+      <div class="col">
+        <h4>Quick Links</h4>
+        <a href="index2.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="features.html">Features</a>
+        <a href="contact.html">Contact Us</a>
+      </div>
+      <div class="col">
+        <h4>Contact Info</h4>
+        <p>VIT Pune Campus</p>
+        <p>info@unisync.edu</p>
+        <p>+91 9876543210</p>
+      </div>
+    </div>
+    <div class="footer-bottom">Developed by VIT Pune Students | A College Communication & Analysis Platform</div>
+  </footer>
+
+  <!-- NEW animation scripts (separate file) -->
+  <script src="assets/particles.js"></script>
+  <script src="assets/cursor_trail.js"></script>
+  <script src="assets/auth_animations.js"></script>
+<script src="assets/flow_lines.js"></script>
+<script src="assets/mesh_lines.js"></script>
+
+  <!-- MAIN JS FILE (keep as in original) -->
+  <script src="assets/main.js"></script>
+
+  <!-- LOGIN LOGIC (kept exactly as your original file) -->
+  <script type="module">
+    localStorage.removeItem("unisync_token");
+    localStorage.removeItem("unisync_user");
+    import { apiPost } from "./assets/api.js";
+
+    const form = document.getElementById("loginForm");
+    const emailInput = document.getElementById("email");
+    const passInput = document.getElementById("password");
+    const errorEl = document.getElementById("error");
+    const loginBtn = document.getElementById("loginBtn");
+    const demoBtn = document.getElementById("demoBtn");
+
+    // DEMO button
+    demoBtn.addEventListener("click", () => {
+      emailInput.value = "student@college.edu";
+      passInput.value = "password123";
+    });
+
+    // SUBMIT HANDLER
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.style.display = "none";
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Logging in...";
+
+      const email = emailInput.value.trim();
+      const password = passInput.value;
+
+      const data = await apiPost("/auth/login", { email, password });
+
+      if (!data.success) {
+        showError(data.message || "Login failed");
+        return;
+      }
+
+      // Store token and user
+      localStorage.setItem("unisync_token", data.token);
+      localStorage.setItem("unisync_user", JSON.stringify(data.user));
+
+      window.location.href = "dashboard.html";
+    });
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.style.display = "block";
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Login";
+    }
+  </script>
+</body>
+</html>

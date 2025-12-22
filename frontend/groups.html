@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UniSync — Groups</title>
+
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/dashboard-style.css" />
+
+  <!-- Groups specific styles (restored look + animations) -->
+  <style>
+    :root{
+      --accent: #9b5cff;
+      --accent-2:#7b4bff;
+      --text: #eef2ff;
+      --muted: rgba(235,235,245,0.45);
+      --card: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.06);
+    }
+
+    .groups-header {
+      display:flex;
+      flex-direction:column;
+      gap:.5rem;
+      margin-bottom:1.5rem;
+    }
+
+    .groups-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap:1.5rem;
+      margin-top:1rem;
+    }
+
+    .group-card{
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px;
+      padding:1.8rem;
+      cursor:pointer;
+      transition: all 0.35s cubic-bezier(.2,.9,.2,1);
+      position:relative;
+      overflow:hidden;
+      animation: fadeInUp 0.6s ease forwards;
+      opacity: 0;
+    }
+
+    .group-card::before{
+      content:'';
+      position:absolute;
+      top:0;
+      left:0;
+      width:4px;
+      height:100%;
+      background: linear-gradient(180deg,var(--accent),var(--accent-2));
+      transform: scaleY(0);
+      transition: transform .28s ease;
+    }
+
+    .group-card:hover{
+      transform: translateY(-10px);
+      border-color: rgba(155,92,255,0.28);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+    }
+    .group-card:hover::before{ transform: scaleY(1); }
+
+    .group-card-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      margin-bottom:1rem;
+    }
+
+    .group-name{
+      font-size:1.45rem;
+      font-weight:700;
+      color:var(--text);
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .group-name i{ color: var(--accent); font-size:1.1rem; }
+
+    .badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:20px; font-size:.85rem; font-weight:600; margin-left:8px; }
+    .badge.admin{ background: linear-gradient(45deg,var(--accent),var(--accent-2)); color:white; }
+    .badge.type{ background: rgba(255,255,255,0.06); color: var(--muted); border:1px solid rgba(255,255,255,0.06); }
+
+    .group-info{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap:1rem;
+      margin-top:1rem;
+      padding:1rem;
+      background: rgba(255,255,255,0.02);
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.04);
+    }
+
+    .info-item{ display:flex; flex-direction:column; }
+    .info-label{ font-size:.85rem; color:var(--muted); margin-bottom:6px; }
+    .info-value{ font-size:1.05rem; font-weight:700; color:var(--text); }
+
+    /* removed stats: keep layout but hide any group-stats if accidentally present */
+    .group-stats{ display:none !important; }
+
+    /* filters info kept visually similar */
+    .filters-info{
+      background: linear-gradient(135deg, rgba(155,92,255,0.08), rgba(123,75,255,0.04));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px;
+      padding:2rem;
+      margin-top:2rem;
+      animation: fadeInUp .8s ease forwards;
+      opacity:0;
+    }
+
+    .filters-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap:1.25rem; margin-top:1rem; }
+    .filter-card{ background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:1.25rem; transition:all .25s ease; }
+    .filter-card:hover{ transform:translateY(-6px); border-color: rgba(155,92,255,0.28); }
+
+    @keyframes fadeInUp { from{ opacity:0; transform: translateY(20px) } to{ opacity:1; transform: translateY(0) } }
+
+    /* stagger delays for nice effect */
+    .group-card:nth-child(1){ animation-delay:.08s }
+    .group-card:nth-child(2){ animation-delay:.16s }
+    .group-card:nth-child(3){ animation-delay:.24s }
+    .group-card:nth-child(4){ animation-delay:.32s }
+    .group-card:nth-child(5){ animation-delay:.40s }
+
+    @media(max-width:768px){
+      .groups-grid{ grid-template-columns:1fr; }
+      .group-info{ grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+
+<body class="dashboard-page">
+  <script type="module">
+    import { requireLogin } from "./assets/api.js";
+    requireLogin();
+  </script>
+
+  <div class="dashboard-bg"><div class="bg-overlay"></div></div>
+  <div class="dashboard-particles" id="dashboardParticles"></div>
+
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="logo"><i class="fas fa-sync-alt"></i><span>Uni<span>Sync</span></span></div>
+      <nav>
+        <a href="dashboard.html"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="groups.html" class="active"><i class="fas fa-users"></i><span>Groups</span></a>
+        <a href="matching.html"><i class="fas fa-heart"></i><span>Matching</span></a>
+        <a href="analytics.html"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
+        <a href="profile.html"><i class="fas fa-user"></i><span>Profile</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="themeBtn" class="theme-btn"><i class="fas fa-moon"></i> Theme</button>
+        <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="welcome-header">
+        <div class="user-greeting">
+          <h1>Your Groups</h1>
+          <p class="subtitle">Browse your groups below.</p>
+        </div>
+        <div class="user-avatar">
+          <div class="avatar-circle" id="userAvatar"><i class="fas fa-users"></i></div>
+        </div>
+      </header>
+
+      <div class="content-wrapper">
+        <div class="groups-header">
+          <h2>My Groups <span id="groupCount" class="badge type">0 groups</span></h2>
+        </div>
+
+        <div id="groupList" class="groups-grid">
+          <div style="text-align:center; padding:3rem; grid-column:1/-1;">
+            <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--accent)"></i>
+            <p style="margin-top:1rem; color:var(--muted)">Loading your groups...</p>
+          </div>
+        </div>
+
+        <div class="filters-info" aria-hidden="false">
+          <h3><i class="fas fa-filter"></i> Message Filters</h3>
+          <p style="color:var(--muted); margin-bottom:1rem">Use filters to target specific audiences within a group.</p>
+          <div class="filters-grid">
+            <div class="filter-card">
+              <div class="filter-icon"><i class="fas fa-female"></i></div>
+              <h4>Send to Girls Only</h4>
+              <p style="color:var(--muted)">Use <code>@girls</code></p>
+            </div>
+            <div class="filter-card">
+              <div class="filter-icon"><i class="fas fa-male"></i></div>
+              <h4>Send to Boys Only</h4>
+              <p style="color:var(--muted)">Use <code>@boys</code></p>
+            </div>
+            <div class="filter-card">
+              <div class="filter-icon"><i class="fas fa-user-shield"></i></div>
+              <h4>Send to Admins Only</h4>
+              <p style="color:var(--muted)">Use <code>@admins</code></p>
+            </div>
+            <div class="filter-card">
+              <div class="filter-icon"><i class="fas fa-users"></i></div>
+              <h4>Send to Everyone</h4>
+              <p style="color:var(--muted)">Use <code>@everyone</code></p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { GroupsAPI, AuthAPI } from "./assets/api.js";
+
+    const groupList = document.getElementById('groupList');
+    const groupCount = document.getElementById('groupCount');
+
+    // user avatar
+    const user = JSON.parse(localStorage.getItem('unisync_user') || '{}');
+    if (user.full_name) {
+      const initials = user.full_name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
+      document.getElementById('userAvatar').innerHTML = `<span class="avatar-initials">${initials}</span>`;
+    }
+
+    // load groups from backend - keep exact backend logic
+    async function loadGroups(){
+      const res = await GroupsAPI.myGroups();
+      if(!res.success){
+        groupList.innerHTML = `<div class="empty-state"><h3>Failed to load groups</h3><p>Please try again.</p></div>`;
+        return;
+      }
+
+      const groups = res.groups || [];
+      groupCount.textContent = `${groups.length} group${groups.length !== 1 ? 's' : ''}`;
+
+      if(groups.length === 0){
+        groupList.innerHTML = `<div class="empty-state"><h3>No Groups Yet</h3><p>You are not a member of any groups.</p></div>`;
+        return;
+      }
+
+      // build cards (no fake stats)
+      groupList.innerHTML = groups.map((g, idx) => {
+        const typeLabel = g.type === 'branch' ? 'Branch Group' : (g.type === 'division' ? 'Division Group' : 'Group');
+        const adminBadge = g.is_admin ? `<span class="badge admin">Admin</span>` : '';
+        const animDelay = (idx * 0.08 + 0.08).toFixed(2);
+
+        // Ensure values fallback to 'All' or empty string, and show labels properly
+        const branch = g.branch || 'All';
+        const year = g.year || 'All';
+        const division = (typeof g.division === 'string' && g.division.toLowerCase() !== 'null') ? (g.division || 'All') : 'All';
+
+        return `
+          <div class="group-card" data-id="${g.group_id}" style="animation-delay:${animDelay}s">
+            <div class="group-card-header">
+              <h3 class="group-name"><i class="fas fa-users"></i> ${escapeHtml(g.group_name || 'Group')} ${adminBadge}</h3>
+              <span class="badge type">${escapeHtml(typeLabel)}</span>
+            </div>
+
+            <div class="group-info">
+              <div class="info-item">
+                <div class="info-label">Branch</div>
+                <div class="info-value">${escapeHtml(branch)}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Year</div>
+                <div class="info-value">${escapeHtml(year)}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Division</div>
+                <div class="info-value">${escapeHtml(division)}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // attach click events
+      document.querySelectorAll('.group-card').forEach(card=>{
+        card.addEventListener('click', ()=>{
+          const id = card.dataset.id;
+          window.location.href = `chat.html?group=${id}`;
+        });
+      });
+    }
+
+    // small escape helper
+    function escapeHtml(s){
+      if(s === undefined || s === null) return '';
+      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+    }
+
+    loadGroups();
+
+    document.getElementById('logoutBtn').addEventListener('click', ()=>AuthAPI.logout());
+    document.getElementById('themeBtn').addEventListener('click', ()=>document.body.classList.toggle('light'));
+  </script>
+
+  <script src="assets/dashboard-animations.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

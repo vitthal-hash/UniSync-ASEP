@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UniSync — Dashboard</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Dashboard specific styles -->
+  <link rel="stylesheet" href="assets/dashboard-style.css" />
+</head>
+
+<body class="dashboard-page">
+  <script type="module">
+    import { requireLogin } from "./assets/api.js";
+    requireLogin();
+  </script>
+
+  <!-- Dashboard background with college image -->
+  <div class="dashboard-bg">
+    <div class="bg-overlay"></div>
+  </div>
+
+  <!-- Animated particles -->
+  <div class="dashboard-particles" id="dashboardParticles"></div>
+
+  <div class="dashboard-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <i class="fas fa-sync-alt"></i>
+        <span>Uni<span>Sync</span></span>
+      </div>
+
+      <nav>
+        <a href="dashboard.html" class="active">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </a>
+        <a href="groups.html">
+          <i class="fas fa-users"></i>
+          <span>Groups</span>
+        </a>
+        <a href="matching.html">
+          <i class="fas fa-heart"></i>
+          <span>Matching</span>
+        </a>
+        <a href="analytics.html">
+          <i class="fas fa-chart-line"></i>
+          <span>Analytics</span>
+        </a>
+        <a href="profile.html">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="themeBtn" class="theme-btn">
+          <i class="fas fa-moon"></i> Theme
+        </button>
+        <button id="logoutBtn" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <!-- Welcome Header -->
+      <header class="welcome-header">
+        <div class="user-greeting">
+          <h1 id="welcomeText">Welcome to UniSync Community</h1>
+          <p class="subtitle">Your college communication and analytics platform</p>
+        </div>
+        <div class="user-avatar">
+          <div class="avatar-circle" id="userAvatar">
+            <i class="fas fa-user"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content Area -->
+      <div class="content-wrapper">
+        <!-- What UniSync Offers Section -->
+        <section class="main-card">
+          <div class="card-header">
+            <h2><i class="fas fa-star"></i> What UniSync Offers</h2>
+            <p class="card-subtitle">Everything you need for seamless college communication and collaboration</p>
+          </div>
+          
+          <div class="offers-grid">
+            <div class="offer-item">
+              <div class="offer-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div class="offer-content">
+                <h3>Real-time Group Chats</h3>
+                <p>Connect with peers in your branch & division through instant messaging and file sharing.</p>
+              </div>
+            </div>
+            
+            <div class="offer-item">
+              <div class="offer-icon">
+                <i class="fas fa-code"></i>
+              </div>
+              <div class="offer-content">
+                <h3>Skill-Based Matching</h3>
+                <p>Find study partners based on skills, interests, and programming languages.</p>
+              </div>
+            </div>
+            
+            <div class="offer-item">
+              <div class="offer-icon">
+                <i class="fas fa-chart-pie"></i>
+              </div>
+              <div class="offer-content">
+                <h3>Insightful Analytics</h3>
+                <p>Track group activity, participation rates, and performance metrics.</p>
+              </div>
+            </div>
+            
+            
+          </div>
+          
+          <!-- Feature Details -->
+          <div class="feature-details">
+            <h3>Feature Highlights</h3>
+            <ul>
+              <li><i class="fas fa-check-circle"></i> Real-time group chats with peers in your branch & division</li>
+              <li><i class="fas fa-check-circle"></i> Matching based on skills, interests, and programming languages</li>
+              <li><i class="fas fa-check-circle"></i> Insightful analytics for each group</li>
+              <li><i class="fas fa-check-circle"></i> Simple UI, no notifications, clean & modern design</li>
+              <li><i class="fas fa-check-circle"></i> Secure and private communication channels</li>
+              <li><i class="fas fa-check-circle"></i> File and media sharing capabilities</li>
+            </ul>
+          </div>
+          
+          <!-- Quick Stats -->
+         
+          </div>
+        </section>
+
+        <!-- Get Started Section -->
+        <section class="get-started-card" style="margin-top: 40px;">
+          <div class="card-header">
+            <h2><i class="fas fa-rocket"></i> Get Started</h2>
+            <p class="card-subtitle">Start exploring UniSync features today</p>
+          </div>
+          
+          <div class="cta-buttons">
+            <a href="groups.html" class="cta-btn primary">
+              <i class="fas fa-users"></i>
+              <span>Explore Groups</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+            <a href="matching.html" class="cta-btn secondary">
+              <i class="fas fa-heart"></i>
+              <span>Find Matches</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+            <a href="analytics.html" class="cta-btn secondary">
+              <i class="fas fa-chart-line"></i>
+              <span>View Analytics</span>
+              <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+          
+          <div class="tip-section">
+            <p><i class="fas fa-lightbulb"></i> <strong>Tip:</strong> Complete your profile to get better matches and recommendations.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- JS -->
+  <script type="module">
+    import { AuthAPI } from "./assets/api.js";
+
+    const user = JSON.parse(localStorage.getItem("unisync_user") || "{}");
+
+    const welcomeEl = document.getElementById("welcomeText");
+    const avatarEl = document.getElementById("userAvatar");
+    
+    // Set welcome text
+    if (user.full_name) {
+      welcomeEl.textContent = `Welcome back, ${user.full_name}!`;
+    } else if (user.email) {
+      welcomeEl.textContent = `Welcome back, ${user.email.split('@')[0]}!`;
+    }
+    
+    // Set avatar initials
+    if (user.full_name) {
+      const initials = user.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
+      avatarEl.innerHTML = `<span class="avatar-initials">${initials}</span>`;
+    }
+
+    // logout
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      AuthAPI.logout();
+    });
+    
+    // Theme toggle
+    document.getElementById("themeBtn").addEventListener("click", () => {
+      document.body.classList.toggle('light');
+      const themeBtn = document.getElementById('themeBtn');
+      const icon = themeBtn.querySelector('i');
+      if (document.body.classList.contains('light')) {
+        icon.className = 'fas fa-sun';
+        themeBtn.innerHTML = '<i class="fas fa-sun"></i> Light';
+      } else {
+        icon.className = 'fas fa-moon';
+        themeBtn.innerHTML = '<i class="fas fa-moon"></i> Dark';
+      }
+    });
+  </script>
+
+  <!-- Dashboard animations -->
+  <script src="assets/dashboard-animations.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

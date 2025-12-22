@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UniSync — Register (Step 3)</title>
+
+  <!-- layout + animations css -->
+  <link rel="stylesheet" href="assets/auth.css" />
+  <!-- keep global styles -->
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+
+<body class="auth-page">
+
+  <!-- Full-page animation container (shared) -->
+  <div class="global-anim-bg" aria-hidden="true">
+    <canvas id="bgMesh"></canvas>
+    <canvas id="bgFlow"></canvas>
+    <canvas id="bgParticles"></canvas>
+  </div>
+
+  <!-- NAVBAR (same as homepage) -->
+  <nav class="top-nav">
+    <div class="nav-left">
+      <a href="index2.html" class="logo">
+        <span class="sync-icon">⟳</span>
+        <span class="brand">Uni<span>sync</span></span>
+      </a>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="index2.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="features.html">Features</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="index.html" class="btn small outline">Login</a>
+      <a href="register_email.html" class="btn small primary">Join Now</a>
+    </div>
+  </nav>
+
+  <!-- MAIN two-column container (left: copy, right: card) -->
+  <main class="auth-container">
+    <section class="auth-left">
+      <div class="hero-copy">
+        <h1>Profile Details</h1>
+        <p class="lead">Step 3 — Provide academic details, skills, interests and languages.</p>
+        <p class="muted">This information helps UniSync personalize your academic feed, groups and recommendations.</p>
+      </div>
+    </section>
+
+  <aside class="auth-right">
+  <div class="card auth-card">
+
+    <main style="width:100%;max-width:100%">
+      <form id="profileForm" autocomplete="off">
+
+        <!-- ===== BASIC DETAILS (2 COLUMN GRID) ===== -->
+        <div class="form-grid-2">
+
+          <div class="field">
+            <label>Full Name</label>
+            <input type="text" id="fullName" required placeholder="Enter your full name">
+          </div>
+
+          <div class="field">
+            <label>Gender</label>
+            <select id="gender" required>
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+              <option value="prefer_not">Prefer not to say</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Roll Number</label>
+            <input type="text" id="roleNumber" required placeholder="Enter your roll number">
+          </div>
+
+          <div class="field">
+            <label>Branch</label>
+            <select id="branch" required>
+              <option value="">Select Branch</option>
+              <option value="Computer Engineering">Computer Engineering</option>
+              <option value="Information Technology">Information Technology</option>
+              <option value="Electronics Engineering">Electronics Engineering</option>
+              <option value="Electrical Engineering">Electrical Engineering</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="Civil Engineering">Civil Engineering</option>
+              <option value="Chemical Engineering">Chemical Engineering</option>
+              <option value="Biotech">Biotechnology</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>PRN Number</label>
+            <input type="text" id="prnNumber" required placeholder="Enter your PRN number">
+          </div>
+
+          <div class="field">
+            <label>Year</label>
+            <select id="year" required>
+              <option value="">Select Year</option>
+              <option value="FE">FE</option>
+              <option value="SE">SE</option>
+              <option value="TE">TE</option>
+              <option value="BE">BE</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>City</label>
+            <input type="text" id="city" required placeholder="Enter your city">
+          </div>
+
+          <div class="field">
+            <label>Division</label>
+            <input type="text" id="division" required placeholder="A / B / C">
+          </div>
+
+          <div class="field">
+            <label>Batch</label>
+            <select id="batch" required>
+              <option value="">Select Batch</option>
+              <option value="1">Batch 1</option>
+              <option value="2">Batch 2</option>
+              <option value="3">Batch 3</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>CGPA (optional)</label>
+            <input type="number" id="cgpa" step="0.01" placeholder="8.50">
+          </div>
+
+        </div>
+
+        <hr style="margin:22px 0;border-color:var(--border);">
+
+        <!-- SKILLS / INTERESTS / LANGUAGES WILL CONTINUE BELOW (UNCHANGED) -->
+
+
+<div class="field">
+            <!-- Skills (expanded, do not remove lines) -->
+            <label>Skills (select multiple)</label>
+            <select id="skills" multiple>
+  <option value="Programming">Programming</option>
+  <option value="Data Analysis">Data Analysis</option>
+  <option value="CAD Design">CAD Design</option>
+  <option value="Circuit Design">Circuit Design</option>
+  <option value="Simulation Tools">Simulation Tools</option>
+  <option value="Technical Drawing">Technical Drawing</option>
+  <option value="Web Development">Web Development</option>
+  <option value="App Development">App Development</option>
+  <option value="Embedded Systems">Embedded Systems</option>
+  <option value="AI/ML">AI / ML</option>
+  <option value="Cybersecurity">Cybersecurity</option>
+  <option value="Cloud Computing">Cloud Computing</option>
+  <option value="Mechanical Design">Mechanical Design</option>
+  <option value="Civil Planning">Civil Planning</option>
+  <option value="Electrical Systems">Electrical Systems</option>
+  <option value="Project Management">Project Management</option>
+  <option value="Research & Documentation">Research & Documentation</option>
+  <option value="Problem Solving">Problem Solving</option>
+  <option value="Communication">Communication</option>
+  <option value="Teamwork">Teamwork</option>
+  <option value="UI/UX Design">UI/UX Design</option>
+  <option value="Database Management">Database Management</option>
+  <option value="Networking">Networking</option>
+  <option value="DevOps">DevOps</option>
+  <option value="Hardware Troubleshooting">Hardware Troubleshooting</option>
+  <option value="PLC/Automation">PLC/Automation</option>
+  <option value="3D Printing">3D Printing</option>
+  <option value="Product Design">Product Design</option>
+  <option value="Entrepreneurship">Entrepreneurship</option>
+</select>
+</div>
+<div class="field" style="margin-top:14px;">
+            <!-- Interests (expanded) -->
+            <label style="margin-top:14px;">Interests (select multiple)</label>
+            <select id="interests" multiple>
+  <option value="Coding">Coding</option>
+  <option value="Robotics">Robotics</option>
+  <option value="AI/ML">AI / ML</option>
+  <option value="IoT">IoT</option>
+  <option value="Automobile">Automobile</option>
+  <option value="Aerospace">Aerospace</option>
+  <option value="Architecture">Architecture</option>
+  <option value="Research">Research</option>
+  <option value="Painting">Painting</option>
+  <option value="Sketching">Sketching</option>
+  <option value="Digital Art">Digital Art</option>
+  <option value="Photography">Photography</option>
+  <option value="Video Editing">Video Editing</option>
+  <option value="Singing">Singing</option>
+  <option value="Dancing">Dancing</option>
+  <option value="Writing">Writing</option>
+  <option value="Cricket">Cricket</option>
+  <option value="Football">Football</option>
+  <option value="Badminton">Badminton</option>
+  <option value="Gym/Fitness">Gym / Fitness</option>
+  <option value="Swimming">Swimming</option>
+  <option value="Cycling">Cycling</option>
+  <option value="Trekking">Trekking</option>
+  <option value="Yoga">Yoga</option>
+  <option value="Riding Bikes">Riding Bikes</option>
+  <option value="Long Drives">Long Drives</option>
+  <option value="Traveling">Traveling</option>
+  <option value="Cooking">Cooking</option>
+  <option value="Reading">Reading</option>
+  <option value="Movies/Shows">Movies / Shows</option>
+  <option value="Gaming">Gaming</option>
+  <option value="Meditation">Meditation</option>
+  <option value="Volunteering">Volunteering</option>
+  <option value="Event Management">Event Management</option>
+  <option value="Public Speaking">Public Speaking</option>
+  <option value="Content Creation">Content Creation</option>
+  <option value="Startup">Startup</option>
+  <option value="Open Source">Open Source</option>
+</select>
+</div>
+<div class="field" style="margin-top:14px;">
+            <!-- Languages (expanded) -->
+            <label style="margin-top:14px;">Programming Languages (multiple)</label>
+            <select id="languages" multiple>
+  <option value="C">C</option>
+  <option value="C++">C++</option>
+  <option value="Java">Java</option>
+  <option value="Python">Python</option>
+  <option value="JavaScript">JavaScript</option>
+  <option value="TypeScript">TypeScript</option>
+  <option value="HTML">HTML</option>
+  <option value="CSS">CSS</option>
+  <option value="PHP">PHP</option>
+  <option value="SQL">SQL</option>
+  <option value="R">R</option>
+  <option value="MATLAB">MATLAB</option>
+  <option value="Assembly">Assembly</option>
+  <option value="Verilog">Verilog</option>
+  <option value="VHDL">VHDL</option>
+  <option value="Embedded C">Embedded C</option>
+  <option value="Kotlin">Kotlin</option>
+  <option value="Swift">Swift</option>
+  <option value="Dart">Dart</option>
+  <option value="Go">Go</option>
+  <option value="Rust">Rust</option>
+  <option value="Scala">Scala</option>
+  <option value="Perl">Perl</option>
+  <option value="Lua">Lua</option>
+  <option value="Shell">Shell Scripting</option>
+</select>
+</div>
+<div class="field" style="margin-top:14px;">
+  <label>Clubs (optional – select multiple)</label>
+  <select id="clubs" multiple>
+
+    <option>Dean’s Message</option>
+    <option>Microsoft Learn Student Club</option>
+    <option>Team Endurance Racing</option>
+    <option>GedIT Coding Club</option>
+    <option>Ekasutram</option>
+    <option>Google Developer Student Clubs</option>
+    <option>ISA VIT, PUNE</option>
+    <option>Team Griffin India</option>
+    <option>CSI VIT, Pune</option>
+    <option>Team Vishwanetrutvam</option>
+    <option>Team Veloce Racing</option>
+    <option>Club Catalyst</option>
+    <option>Game Dev +</option>
+    <option>IEEE VIT, Pune</option>
+    <option>CHESA</option>
+    <option>TRF – The Robotics Forum</option>
+    <option>Reality Spectra</option>
+    <option>Team Quark</option>
+    <option>Reports</option>
+    <option>Personality Development Club</option>
+    <option>Indus Connect</option>
+    <option>InnovSphere</option>
+    <option>Pi Editorial Board</option>
+    <option>Antariksh Club of VI</option>
+    <option>EPEC</option>
+    <option>SW & D</option>
+    <option>Light-hearted Lounge</option>
+    <option>C-Cube</option>
+    <option>RangManch</option>
+    <option>Abhivridhhi</option>
+    <option>Team Eklavya</option>
+    <option>The Investment Forum</option>
+    <option>VEDC</option>
+    <option>Speaker’s Club</option>
+
+  </select>
+</div>
+
+            <button type="submit" id="registerBtn" style="margin-top:16px;">Complete Registration</button>
+
+            <p id="error" style="color:#c33;margin-top:12px;display:none;"></p>
+            <p id="success" style="color:#3c3;margin-top:12px;display:none;"></p>
+          </form>
+        </main>
+        <!-- end original -->
+
+      </div>
+
+      <footer class="auth-footer">© UniSync</footer>
+    </aside>
+  </main>
+
+  <footer class="global-footer">
+    <div class="footer-grid">
+      <div class="col">
+        <h4>Unisync</h4>
+        <p>Revolutionizing college communication and analysis through innovative technology solutions.</p>
+      </div>
+      <div class="col">
+        <h4>Quick Links</h4>
+        <a href="index2.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="features.html">Features</a>
+        <a href="contact.html">Contact Us</a>
+      </div>
+      <div class="col">
+        <h4>Contact Info</h4>
+        <p>VIT Pune Campus</p>
+        <p>info@unisync.edu</p>
+        <p>+91 9876543210</p>
+      </div>
+    </div>
+    <div class="footer-bottom">Developed by VIT Pune Students | A College Communication & Analysis Platform</div>
+  </footer>
+
+  <!-- animations -->
+  <script src="assets/particles.js"></script>
+  <script src="assets/cursor_trail.js"></script>
+  <script src="assets/auth_animations.js"></script>
+  <script src="assets/flow_lines.js"></script>
+  <script src="assets/mesh_lines.js"></script>
+
+  <!-- ORIGINAL profile JS (kept unchanged) -->
+  <script type="module">
+  import { apiPost } from "./assets/api.js";
+
+  // Get all elements
+  const form = document.getElementById("profileForm");
+
+  const fullName = document.getElementById("fullName");
+  const branch = document.getElementById("branch");
+  const year = document.getElementById("year");
+  const division = document.getElementById("division");
+  const cgpa = document.getElementById("cgpa");
+
+  const skills = document.getElementById("skills");
+  const interests = document.getElementById("interests");
+  const languages = document.getElementById("languages");
+const clubs = document.getElementById("clubs");
+
+  const errorEl = document.getElementById("error");
+  const successEl = document.getElementById("success");
+  const registerBtn = document.getElementById("registerBtn");
+
+  function getSelected(selectEl) {
+    return Array.from(selectEl.selectedOptions).map(o => o.value);
+  }
+
+  // ⭐ The ONLY correct submit handler
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    // Read fresh temp token every time
+    const tempToken = localStorage.getItem("unisync_temp_token");
+
+    if (!tempToken || tempToken === "undefined" || tempToken === "null") {
+      showError("Session expired. Please restart registration.");
+      return;
+    }
+
+    errorEl.style.display = "none";
+    successEl.style.display = "none";
+
+    const payload = {
+  tempToken,
+  full_name: fullName.value.trim(),
+  branch: branch.value,
+  year: year.value,
+  division: division.value.trim(),
+  batch: document.getElementById("batch").value,
+  cgpa: cgpa.value ? parseFloat(cgpa.value) : null,
+
+  role_number: document.getElementById("roleNumber").value.trim(),
+  prn_number: document.getElementById("prnNumber").value.trim(),
+  city: document.getElementById("city").value.trim(),
+  gender: document.getElementById("gender").value,
+
+  skills: getSelected(skills),
+  interests: getSelected(interests),
+  languages: getSelected(languages),
+  clubs: getSelected(clubs)
+};
+
+
+    // validation
+   if (
+  !payload.full_name ||
+  !payload.branch ||
+  !payload.year ||
+  !payload.division ||
+  !payload.batch
+) {
+      showError("Fill all required fields.");
+      return;
+    }
+
+    registerBtn.disabled = true;
+    registerBtn.textContent = "Saving...";
+console.log("PAYLOAD SENT TO BACKEND:", payload);
+
+    const result = await apiPost("/auth/register", payload);
+
+    registerBtn.disabled = false;
+    registerBtn.textContent = "Complete Registration";
+
+    if (!result.success) {
+      showError(result.message || "Registration failed.");
+      return;
+    }
+
+    successEl.textContent = "Registration completed successfully!";
+    successEl.style.display = "block";
+
+    // clear temp token
+    localStorage.removeItem("unisync_temp_token");
+
+    // redirect to login page
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 1200);
+  });
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.style.display = "block";
+  }
+  </script>
+
+  <!-- main.js (included as you requested) -->
+  <script src="assets/main.js"></script>
+
+</body>
+</html>

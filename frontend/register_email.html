@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UniSync — Register (Step 1)</title>
+
+  <link rel="stylesheet" href="assets/auth.css" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+
+<body class="auth-page">
+  <!-- NAVBAR (same as homepage) -->
+   <div class="global-anim-bg">
+    <canvas id="bgMesh"></canvas>
+    <canvas id="bgFlow"></canvas>
+    <canvas id="bgParticles"></canvas>
+</div>
+
+
+  <nav class="top-nav">
+    <div class="nav-left">
+      <a href="index2.html" class="logo">
+        <span class="sync-icon">⟳</span>
+        <span class="brand">Uni<span>sync</span></span>
+      </a>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="index2.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="features.html">Features</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="index.html" class="btn small outline">Login</a>
+      <a href="register_email.html" class="btn small primary">Join Now</a>
+    </div>
+  </nav>
+
+  <main class="auth-container">
+    <section class="auth-left">
+      <div class="hero-copy">
+        <h1>Create your account</h1>
+        <p class="lead">Step 1 — Verify your college email to get started.</p>
+        <p class="muted">We will send you an OTP to confirm your college email address.</p>
+      </div>
+
+      
+    </section>
+
+    <aside class="auth-right">
+      <div class="card auth-card">
+        <h2>Verify College Email</h2>
+
+        <!-- KEEP the original markup + IDs -->
+        <div id="emailSection">
+          <label for="email">College Email Address</label>
+          <input type="email" id="email" placeholder="you@college.edu" required>
+
+          <button id="sendOtpBtn" style="margin-top:12px;">Send OTP</button>
+
+          <p id="emailError" style="color:#c33;margin-top:8px;display:none;"></p>
+          <p id="emailSuccess" style="color:#3c3;margin-top:8px;display:none;"></p>
+        </div>
+
+        <div id="otpSection" style="display:none;margin-top:25px;">
+          <label for="otp">Enter OTP (sent to your email)</label>
+          <input type="number" id="otp" placeholder="6-digit OTP" required>
+
+          <button id="verifyOtpBtn" style="margin-top:12px;">Verify OTP</button>
+
+          <p id="otpError" style="color:#c33;margin-top:8px;display:none;"></p>
+          <p id="otpSuccess" style="color:#3c3;margin-top:8px;display:none;"></p>
+        </div>
+
+        <p style="margin-top:16px;color:var(--muted);text-align:center;">
+          Already have an account?
+          <a href="login.html">Login</a>
+        </p>
+      </div>
+
+      <footer class="auth-footer">© UniSync</footer>
+    </aside>
+  </main>
+
+  <footer class="global-footer">
+    <div class="footer-grid">
+      <div class="col">
+        <h4>Unisync</h4>
+        <p>Revolutionizing college communication and analysis through innovative technology solutions.</p>
+      </div>
+      <div class="col">
+        <h4>Quick Links</h4>
+        <a href="index2.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="features.html">Features</a>
+        <a href="contact.html">Contact Us</a>
+      </div>
+      <div class="col">
+        <h4>Contact Info</h4>
+        <p>VIT Pune Campus</p>
+        <p>info@unisync.edu</p>
+        <p>+91 9876543210</p>
+      </div>
+    </div>
+    <div class="footer-bottom">Developed by VIT Pune Students | A College Communication & Analysis Platform</div>
+  </footer>
+
+  <!-- new animations -->
+  <script src="assets/particles.js"></script>
+  <script src="assets/cursor_trail.js"></script>
+  <script src="assets/auth_animations.js"></script>
+  <script src="assets/flow_lines.js"></script>
+<script src="assets/mesh_lines.js"></script>
+
+
+  <!-- keep main.js -->
+  <script src="assets/main.js"></script>
+
+  <!-- REGISTER STEP 1 LOGIC (unchanged, copied from your original) -->
+  <script type="module">
+    import { apiPost } from "./assets/api.js";
+
+    const emailInput = document.getElementById("email");
+    const sendOtpBtn = document.getElementById("sendOtpBtn");
+    const emailError = document.getElementById("emailError");
+    const emailSuccess = document.getElementById("emailSuccess");
+
+    const otpSection = document.getElementById("otpSection");
+    const otpInput = document.getElementById("otp");
+    const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+    const otpError = document.getElementById("otpError");
+    const otpSuccess = document.getElementById("otpSuccess");
+
+    // ---------------------------
+    // STEP 1 — SEND OTP
+    // ---------------------------
+    sendOtpBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+
+      emailError.style.display = "none";
+      emailSuccess.style.display = "none";
+
+      if (!email) {
+        emailError.textContent = "Please enter your college email.";
+        emailError.style.display = "block";
+        return;
+      }
+
+      sendOtpBtn.disabled = true;
+      sendOtpBtn.textContent = "Sending...";
+
+      const result = await apiPost("/auth/send-otp", { email });
+
+      sendOtpBtn.disabled = false;
+      sendOtpBtn.textContent = "Send OTP";
+
+      if (!result.success) {
+        emailError.textContent = result.message || "Failed to send OTP.";
+        emailError.style.display = "block";
+        return;
+      }
+
+      emailSuccess.textContent = "OTP sent successfully!";
+      emailSuccess.style.display = "block";
+
+      // Show OTP section
+      otpSection.style.display = "block";
+    });
+
+    // ---------------------------
+    // STEP 2 — VERIFY OTP
+    // ---------------------------
+    verifyOtpBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      const otp = otpInput.value.trim();
+
+      otpError.style.display = "none";
+      otpSuccess.style.display = "none";
+
+      if (!otp) {
+        otpError.textContent = "Please enter OTP.";
+        otpError.style.display = "block";
+        return;
+      }
+
+      verifyOtpBtn.disabled = true;
+      verifyOtpBtn.textContent = "Verifying...";
+
+      const result = await apiPost("/auth/verify-otp", { email, otp });
+
+      verifyOtpBtn.disabled = false;
+      verifyOtpBtn.textContent = "Verify OTP";
+
+      if (!result.success) {
+        otpError.textContent = result.message || "OTP verification failed.";
+        otpError.style.display = "block";
+        return;
+      }
+
+      otpSuccess.textContent = "OTP verified!";
+      otpSuccess.style.display = "block";
+
+      // Save temporary token for registration
+      localStorage.setItem("unisync_temp_token", result.tempToken);
+
+      // Redirect to step 2: password setup
+      setTimeout(() => {
+        window.location.href = "register_password.html";
+      }, 900);
+    });
+  </script>
+</body>
+</html>

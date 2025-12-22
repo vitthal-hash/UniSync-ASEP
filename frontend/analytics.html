@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UniSync — Analytics</title>
+
+  <!-- Core styles -->
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="assets/dashboard-style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Chart.js (stable UMD) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    body {
+      background: url("https://images.unsplash.com/photo-1567687817558-7eb4f184356c?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cXVpZXQlMjBwbGFjZXxlbnwwfHwwfHx8MA%3D%3D") center/cover no-repeat fixed;
+      backdrop-filter: blur(4px);
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .analytics-grid { grid-template-columns: 1fr; }
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 280px !important;
+    }
+
+    .analytics-card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.08);
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+    /* 🔧 FORCE TEXT COLOR FOR ANALYTICS (FIX WHITE ON WHITE) */
+.analytics-card,
+.analytics-card h1,
+.analytics-card h2,
+.analytics-card h3,
+.analytics-card h4,
+.analytics-card p,
+.analytics-card li,
+.analytics-card label {
+  color: #1f2937 !important; /* dark slate */
+}
+
+/* Insights & members list */
+.analytics-card ul li {
+  font-size: 15px;
+  margin-bottom: 6px;
+  color: #1f2937 !important;
+}
+
+/* Group selector label */
+label {
+  color: #1f2937 !important;
+}
+
+/* Fix headings inside analytics area */
+#analyticsArea h3 {
+  color: #111827 !important;
+  font-weight: 600;
+}
+/* ============================
+   FIX DROPDOWN TEXT VISIBILITY
+   ============================ */
+
+#groupSelect {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;        /* dark text */
+  border: 1px solid #d1d5db !important;
+}
+
+/* Placeholder option */
+#groupSelect option[value=""] {
+  color: #9ca3af !important;        /* gray placeholder */
+}
+
+/* All dropdown options */
+#groupSelect option {
+  color: #111827 !important;        /* strong dark text */
+  background-color: #ffffff !important;
+}
+
+/* Selected option highlight */
+#groupSelect option:checked {
+  background-color: #2563eb !important; /* blue highlight */
+  color: #ffffff !important;
+}
+
+/* Hover (some browsers) */
+#groupSelect option:hover {
+  background-color: #e5e7eb !important;
+  color: #111827 !important;
+}
+
+/* Label above dropdown */
+label,
+.analytics-group-label {
+  color: #111827 !important;
+  font-weight: 600;
+}
+/* ===============================
+   ANALYTICS – MATCHING STYLE BOX
+   =============================== */
+
+.analytics-banner {
+  width: 100%;
+  padding: 34px 40px;
+  background: linear-gradient(
+      90deg,
+      rgba(124,58,237,0.9),
+      rgba(99,102,241,0.9),
+      rgba(34,197,94,0.9)
+    );
+  color: #fff;
+  border-radius: 18px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+}
+
+.analytics-banner h1 {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 700;
+}
+
+.analytics-banner p {
+  margin-top: 6px;
+  font-size: 1.05rem;
+  opacity: 0.95;
+}
+
+/* Main white container (same as matching) */
+.analytics-body-container {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 35px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Group dropdown header */
+.analytics-dropdown-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.analytics-dropdown-title i {
+  color: #7c3aed;
+}
+
+/* Empty analytics state */
+.analytics-empty {
+  text-align: center;
+  padding: 45px 20px;
+}
+
+.analytics-empty i {
+  font-size: 42px;
+  color: #c7cde0;
+  margin-bottom: 12px;
+}
+
+.analytics-empty h2 {
+  font-size: 1.4rem;
+  margin: 8px 0;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.analytics-empty p {
+  color: #64748b;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+/* Insight icons row */
+.analytics-icon-row {
+  display: flex;
+  justify-content: center;
+  gap: 26px;
+  margin-top: 22px;
+}
+
+.analytics-round-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.icon-chart { background: #6366f1; }
+.icon-users { background: #22c55e; }
+.icon-insight { background: #f59e0b; }
+.analytics-table th,
+.analytics-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.analytics-table th {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+  </style>
+</head>
+
+<body>
+
+<script type="module">
+  import { requireLogin } from "./assets/api.js";
+  requireLogin();
+</script>
+
+<div class="dashboard">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fas fa-sync-alt"></i>
+      <span>Uni<span>Sync</span></span>
+    </div>
+
+    <nav>
+      <a href="dashboard.html"><i class="fas fa-home"></i> Home</a>
+      <a href="groups.html"><i class="fas fa-users"></i> Groups</a>
+      <a href="matching.html"><i class="fas fa-heart"></i> Matching</a>
+      <a href="analytics.html" class="active"><i class="fas fa-chart-line"></i> Analytics</a>
+      <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- Header -->
+<!-- ANALYTICS TOP BANNER -->
+<div class="analytics-banner">
+  <h1 id="analyticsWelcome">Hey!</h1>
+  <p>Explore deep insights, trends, and patterns from your group data.</p>
+</div>
+
+<!-- ANALYTICS BODY -->
+<div class="analytics-body-container">
+
+  <div class="analytics-dropdown-title">
+    <i class="fas fa-chart-line"></i> Select Your Group
+  </div>
+
+  <select id="groupSelect">
+    <option value="">Choose a group…</option>
+  </select>
+
+  <!-- EMPTY STATE -->
+  <div id="analyticsEmpty" class="analytics-empty">
+    <i class="fas fa-chart-pie"></i>
+    <h2>Ready to Analyze Your Group?</h2>
+    <p>
+      Select a group to unlock insights like skills distribution,
+      active hours, cities, gender ratio, and world-class analytics.
+    </p>
+
+    <div class="analytics-icon-row">
+      <div class="analytics-round-icon icon-chart">
+        <i class="fas fa-chart-bar"></i>
+      </div>
+      <div class="analytics-round-icon icon-users">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="analytics-round-icon icon-insight">
+        <i class="fas fa-lightbulb"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- REAL ANALYTICS -->
+  <div id="analyticsArea"></div>
+
+</div>
+
+  </main>
+</div>
+
+<script type="module">
+ function getLoggedInUserId() {
+  const user = JSON.parse(localStorage.getItem("unisync_user") || "{}");
+  return user.id;
+}
+
+
+  import { GroupsAPI, AnalyticsAPI, AuthAPI } from "./assets/api.js";
+
+  const groupSelect = document.getElementById("groupSelect");
+  const analyticsArea = document.getElementById("analyticsArea");
+
+  const user = JSON.parse(localStorage.getItem("unisync_user") || "{}");
+  if (user.full_name) {
+    document.getElementById("analyticsWelcome").innerText =
+      "Hey " + user.full_name.split(" ")[0] + "!";
+  }
+
+  async function loadGroups() {
+    const res = await GroupsAPI.myGroups();
+    if (!res?.success) return;
+    res.groups.forEach(g => {
+      groupSelect.innerHTML += `<option value="${g.group_id}">${g.group_name}</option>`;
+    });
+  }
+
+  groupSelect.addEventListener("change", async () => {
+  if (!groupSelect.value) {
+    document.getElementById("analyticsEmpty").style.display = "block";
+    analyticsArea.innerHTML = "";
+    return;
+  }
+
+  document.getElementById("analyticsEmpty").style.display = "none";
+
+  const res = await AnalyticsAPI.groupAnalytics(groupSelect.value);
+  if (!res?.success) return;
+renderAnalytics(res);
+
+// 🔥 STEP 1: compute CWES for selected group
+await fetch(
+  `http://localhost:5000/api/analytics/${groupSelect.value}/compute-engagement`,
+  {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("unisync_token")
+    }
+  }
+);
+
+// 🔥 STEP 2: now fetch CWES
+loadCWES(groupSelect.value);
+
+
+});
+
+function getTopClub(usersWithClubs = []) {
+  const clubCount = {};
+
+  usersWithClubs.forEach(u => {
+    (u.clubs || []).forEach(c => {
+      clubCount[c] = (clubCount[c] || 0) + 1;
+    });
+  });
+
+  const counts = Object.values(clubCount);
+  if (!counts.length) {
+    return "No club data available for this group.";
+  }
+
+  const maxCount = Math.max(...counts);
+
+  const topClubs = Object.keys(clubCount)
+    .filter(club => clubCount[club] === maxCount);
+
+  if (topClubs.length === 1) {
+    return `Club with maximum members is "${topClubs[0]}" (${maxCount} members).`;
+  }
+
+  return `Clubs with maximum members (${maxCount} members each): ${topClubs.join(", ")}.`;
+}
+
+  function renderAnalytics(d) {
+    analyticsArea.innerHTML = `
+      <div class="analytics-grid">
+        <div class="analytics-card"><h3>Skills</h3><canvas id="skillsChart"></canvas></div>
+        <div class="analytics-card"><h3>Interests</h3><canvas id="interestsChart"></canvas></div>
+        <div class="analytics-card"><h3>Languages</h3><canvas id="languagesChart"></canvas></div>
+        <div class="analytics-card"><h3>Clubs</h3><canvas id="clubsChart"></canvas></div>
+
+        <div class="analytics-card"><h3>Peak Active Hours</h3><canvas id="peakHoursChart"></canvas></div>
+        <div class="analytics-card"><h3>Least Active Hours</h3><canvas id="lowHoursChart"></canvas></div>
+        <div class="analytics-card"><h3>City Distribution</h3><canvas id="cityChart"></canvas></div>
+        <div class="analytics-card"><h3>Gender Ratio</h3><canvas id="genderChart"></canvas></div>
+
+        <div class="analytics-card" style="grid-column:1/-1;">
+          <h3>Insights</h3>
+          <ul>
+  ${d.worldClassInsights.map(i => `<li>${i}</li>`).join("")}
+  <li><b>${getTopClub(d.usersWithClubs)}</b></li>
+</ul>
+
+        </div>
+
+        <div class="analytics-card" style="grid-column:1/-1;">
+          <h3>Members & Clubs</h3>
+          <ul>
+            ${d.usersWithClubs.map(u=>`<li><b>${u.name}</b> – ${u.clubs.join(", ")}</li>`).join("")}
+          </ul>
+        </div>
+      
+      <div class="analytics-card" style="grid-column:1/-1;">
+  <h3>Group Engagement (CWES)</h3>
+
+  <table class="analytics-table" id="cwesTable" style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Member</th>
+        <th>CWES Score</th>
+        <th>Status</th>
+        <th>Suggestion</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+</div>
+    `;
+
+    drawPie("skillsChart", d.skillsDistribution);
+    drawPie("interestsChart", d.interestsDistribution);
+    drawPie("languagesChart", d.languagesDistribution);
+    drawPie("clubsChart", d.clubsDistribution);
+    drawBar("peakHoursChart", d.peakHours, x=>`${x.hour}:00`, "#6366f1");
+    drawBar("lowHoursChart", d.lowHours, x=>`${x.hour}:00`, "#ef4444");
+    drawBar("cityChart", d.cityDistribution, x=>x.city, "#22c55e");
+    drawPie("genderChart", d.genderDistribution, ["#60a5fa","#f472b6","#a3a3a3"], "gender");
+  }
+  function getCWESSuggestion(score) {
+  if (score >= 0.7) {
+    return "Very active contributor. Keep leading discussions and helping others.";
+  }
+  if (score >= 0.3) {
+    return "Moderately engaged. Participating more in replies or polls can boost engagement.";
+  }
+  return "Low engagement. Try participating in discussions or polls to stay connected.";
+}
+
+async function loadCWES(groupId) {
+  const res = await fetch(
+    `http://localhost:5000/api/analytics/${groupId}/cwes`,
+    {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("unisync_token")
+      }
+    }
+  );
+
+  const data = await res.json();
+  if (!data.success) return;
+
+  const tbody = document.querySelector("#cwesTable tbody");
+  if (!tbody) return;
+console.log("CWES members:", data.members);
+
+  tbody.innerHTML = "";
+
+  data.members.forEach((m, i) => {
+    let status = "Passive";
+    if (m.cwes_score >= 0.7) status = "Highly Active";
+    else if (m.cwes_score >= 0.3) status = "Moderate";
+
+    const tr = document.createElement("tr");
+   const loggedInUserId = getLoggedInUserId();
+const suggestion =
+  Number(m.user_id) === Number(loggedInUserId)
+    ? getCWESSuggestion(m.cwes_score)
+    : "—";
+
+tr.innerHTML = `
+  <td>${i + 1}</td>
+  <td>${m.full_name}</td>
+  <td>${Number(m.cwes_score).toFixed(2)}</td>
+  <td>${status}</td>
+  <td>${suggestion}</td>
+`;
+
+    tbody.appendChild(tr);
+  });
+}
+
+  function drawPie(id, arr=[], colors=["#6366f1","#22c55e","#f59e0b","#ef4444"], key="name") {
+    new Chart(document.getElementById(id), {
+      type:"pie",
+      data:{
+        labels: arr.length ? arr.map(x=>x[key]) : ["No data"],
+        datasets:[{ data: arr.length ? arr.map(x=>x.count) : [1], backgroundColor: colors }]
+      },
+      options:{ responsive:true, maintainAspectRatio:false }
+    });
+  }
+
+  function drawBar(id, arr=[], labelFn, color) {
+    new Chart(document.getElementById(id), {
+      type:"bar",
+      data:{
+        labels: arr.length ? arr.map(labelFn) : ["No data"],
+        datasets:[{ data: arr.length ? arr.map(x=>x.count) : [0], backgroundColor: color }]
+      },
+      options:{ responsive:true, maintainAspectRatio:false }
+    });
+  }
+
+  loadGroups();
+</script>
+
+</body>
+</html>

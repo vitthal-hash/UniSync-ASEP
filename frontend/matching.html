@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UniSync — Matching</title>
+
+  <!-- Base project styles -->
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="assets/dashboard-style.css" />
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --accent: #7c3aed;
+      --accent-2: #22c55e;
+      --muted: #7c8696;
+      --text-dark: #1e293b;
+      --card-bg: #ffffff;
+    }
+
+    body {
+      background: #f6f8fc;
+    }
+
+    /* ----------------------------------
+          Top Gradient Banner (RESTORED)
+       ---------------------------------- */
+    .match-banner {
+      width: 100%;
+      padding: 34px 40px;
+      background: linear-gradient(90deg, #7c3aedcc, #22c55ecc), url('');
+      background-size: cover;
+      background-blend-mode: multiply;
+      color: white;
+      border-radius: 18px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .match-banner h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .match-banner p {
+      margin-top: 6px;
+      font-size: 1.05rem;
+      opacity: 0.95;
+    }
+
+    /* ----------------------------------
+         White Rounded Main Container
+       ---------------------------------- */
+    .match-body-container {
+      background: white;
+      border-radius: 20px;
+      padding: 35px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+      animation: slideUp 0.4s ease-out;
+    }
+
+    /* Dropdown wrapper */
+    .dropdown-box {
+      margin-bottom: 25px;
+    }
+
+    .dropdown-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dropdown-title i {
+      color: var(--accent);
+    }
+
+    select#groupSelect {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #c3c8d1;
+      font-size: 1rem;
+      background: #ffffff;
+      color: #1e293b; /* FIXED: now readable */
+      appearance: none;
+    }
+
+    /* ----------------------------------
+           Empty Heart Section
+       ---------------------------------- */
+    .empty-section {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-dark);
+    }
+
+    .empty-section .heart-icon {
+      font-size: 40px;
+      color: #cdd4e1;
+      margin-bottom: 10px;
+    }
+
+    .empty-section h2 {
+      font-size: 1.4rem;
+      margin: 8px 0;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .empty-section p {
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto 20px;
+    }
+
+    /* Three round icons */
+    .icon-row {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      margin-top: 20px;
+    }
+
+    .round-icon {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      animation: popIn 0.4s ease;
+    }
+
+    .icon-skill { background: #8b5cf6; }
+    .icon-interest { background: #fbbf24; }
+    .icon-location { background: #22c55e; }
+
+    /* ----------------------------------
+            Match Cards
+       ---------------------------------- */
+    #resultArea {
+      margin-top: 25px;
+    }
+
+    .match-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      animation: fadeInUp 0.4s ease;
+      display: flex;
+      gap: 18px;
+    }
+
+    .avatar-circle {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #22c55e);
+      color: white;
+      font-weight: 700;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .match-body h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #1e293b;
+    }
+
+    .match-percent {
+      color: #7c3aed;
+      font-weight: 700;
+      margin-top: 6px;
+      font-size: 1rem;
+    }
+
+    .match-info {
+      margin-top: 12px;
+      color: #475569;
+      font-size: 0.95rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+    @keyframes slideUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+    @keyframes popIn { from { opacity:0; transform:scale(0.6) } to { opacity:1; transform:scale(1) } }
+/* ---------- FORCE SIDEBAR ALWAYS BLACK ---------- */
+.sidebar {
+    background: #000 !important;     /* solid black */
+    backdrop-filter: none !important;
+    border-right: none !important;
+}
+
+/* ---------- SIDEBAR TEXT ALWAYS WHITE ---------- */
+.sidebar nav a,
+.sidebar nav a i,
+.sidebar nav a span,
+.logo,
+.logo span,
+.logo i {
+    color: #fff !important;
+}
+
+/* ---------- KEEP HOVER FROM CHANGING BACKGROUND ---------- */
+.sidebar nav a:hover {
+    background: rgba(255,255,255,0.1) !important; /* subtle highlight */
+    color: #fff !important;                       /* still white text */
+    transform: none !important;                   /* stop slide effect */
+}
+
+/* ---------- ACTIVE ITEM ALSO WHITE TEXT ---------- */
+.sidebar nav a.active,
+.sidebar nav a.active i,
+.sidebar nav a.active span {
+    color: #fff !important;
+    background: rgba(255,255,255,0.15) !important;
+}
+/* Blurred background image (like DeepSeek profile page) */
+body {
+  background: url("https://media.istockphoto.com/id/1322277517/photo/wild-grass-in-the-mountains-at-sunset.jpg?s=612x612&w=0&k=20&c=6mItwwFFGqKNKEAzv0mv6TaxhLN3zSE43bWmFN--J5w=") center/cover no-repeat fixed;
+  backdrop-filter: blur(4px);
+}
+
+  </style>
+</head>
+
+<body>
+
+  <!-- Require login (unchanged backend logic) -->
+  <script type="module">
+    import { requireLogin } from "./assets/api.js";
+    requireLogin();
+  </script>
+
+  <div class="dashboard">
+
+    <!-- SIDEBAR (same as your UI) -->
+    <aside class="sidebar">
+      <h2 class="logo">UniSync</h2>
+
+      <nav>
+        <a href="dashboard.html">🏠 Home</a>
+        <a href="groups.html">👥 Groups</a>
+        <a href="matching.html" class="active">💞 Matching</a>
+        <a href="analytics.html">📊 Analytics</a>
+        <a href="profile.html">👤 Profile</a>
+      </nav>
+
+      <button id="logoutBtn" class="logout-btn">Logout</button>
+      <button id="themeBtn" class="theme-btn">Toggle Theme</button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+      <!-- ✅ RESTORED TOP BANNER -->
+      <div class="match-banner">
+        <h1 id="welcomeUser">Hey there!</h1>
+        <p>Ready to find peers who match your skills and interests?</p>
+      </div>
+
+      <!-- White rounded body -->
+      <div class="match-body-container">
+
+        <!-- Dropdown + title -->
+        <div class="dropdown-box">
+          <div class="dropdown-title">
+            <i class="fas fa-users"></i> Select Your Group
+          </div>
+
+          <select id="groupSelect">
+            <option value="">Choose a group...</option>
+          </select>
+        </div>
+
+        <!-- Empty heart section -->
+        <div id="initialScreen" class="empty-section">
+          <div class="heart-icon"><i class="fas fa-heart"></i></div>
+          <h2>Ready to Find Matches?</h2>
+          <p>Select a group from the dropdown above to discover peers who share your interests and skills.</p>
+
+          <div class="icon-row">
+            <div class="round-icon icon-skill"><i class="fas fa-code"></i></div>
+            <div class="round-icon icon-interest"><i class="fas fa-star"></i></div>
+            <div class="round-icon icon-location"><i class="fas fa-map-marker-alt"></i></div>
+          </div>
+        </div>
+
+        <!-- Backend results appear here -->
+        <div id="resultArea"></div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- FULL BACKEND LOGIC RESTORED -->
+  <script type="module">
+    import { GroupsAPI, MatchingAPI, AuthAPI } from "./assets/api.js";
+
+    const welcomeUser = document.getElementById("welcomeUser");
+    const groupSelect = document.getElementById("groupSelect");
+    const resultArea = document.getElementById("resultArea");
+    const initialScreen = document.getElementById("initialScreen");
+
+    /* Show username in banner */
+    
+  const storedUser = JSON.parse(localStorage.getItem("unisync_user") || "{}");
+
+if (storedUser && storedUser.full_name) {
+  const firstName = storedUser.full_name.trim().split(" ")[0];
+  welcomeUser.innerText = `Hey ${firstName}!`;
+} else {
+  welcomeUser.innerText = "Hey there!";
+}
+
+
+    
+
+    function esc(s) {
+      if (!s) return "";
+      return String(s)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    /* Load groups */
+    async function loadGroups() {
+      const res = await GroupsAPI.myGroups();
+      if (!res.success) return;
+
+      res.groups.forEach(g => {
+        groupSelect.innerHTML += `<option value="${g.group_id}">${esc(g.group_name)}</option>`;
+      });
+    }
+
+    /* On group select */
+    groupSelect.addEventListener("change", async () => {
+      const id = groupSelect.value;
+
+      if (!id) {
+        initialScreen.style.display = "block";
+        resultArea.innerHTML = "";
+        return;
+      }
+
+      initialScreen.style.display = "none";
+      resultArea.innerHTML = `<p style="color:var(--muted);padding:10px;">Loading...</p>`;
+
+      const res = await MatchingAPI.match(id);
+      if (!res.success) {
+        resultArea.innerHTML = `<div class="match-card"><p>Error loading matches.</p></div>`;
+        return;
+      }
+
+      renderMatches(res.matches);
+    });
+
+    /* Render backend matches */
+    function renderMatches(matches) {
+      if (!matches || matches.length === 0) {
+        resultArea.innerHTML = `<div class="match-card"><p>No other members in this group.</p></div>`;
+        return;
+      }
+
+      resultArea.innerHTML = matches.map(m => {
+        const initials = (m.full_name || "U")
+          .split(" ")
+          .map(x => x[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2);
+
+        return `
+          <div class="match-card">
+            <div class="avatar-circle">${initials}</div>
+
+            <div class="match-body">
+              <h3>${esc(m.full_name)}</h3>
+              <div class="match-percent">${esc(m.matchPercentage)}% match</div>
+
+              <div class="match-info">
+                <p><b>Common Skills:</b> ${m.commonSkills?.length ? m.commonSkills.join(", ") : "None"}</p>
+                <p><b>Common Interests:</b> ${m.commonInterests?.length ? m.commonInterests.join(", ") : "None"}</p>
+                <p><b>Common Languages:</b> ${m.commonLanguages?.length ? m.commonLanguages.join(", ") : "None"}</p>
+                <p><b>Common Clubs:</b>
+  ${m.commonClubs?.length ? m.commonClubs.join(", ") : "None"}
+</p>
+
+                ${m.sameCity ? `<p><b>Same City:</b> ${esc(m.sameCity)}</p>` : ""}
+                ${m.sameGender ? `<p><b>Same Gender:</b> ${esc(m.sameGender)}</p>` : ""}
+                ${m.sameBatch ? `<p><b>Same Batch:</b> ${esc(m.sameBatch)}</p>` : ""}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    /* Logout & Theme */
+    document.getElementById("logoutBtn").onclick = () => AuthAPI.logout();
+    document.getElementById("themeBtn").onclick = () =>
+      document.body.classList.toggle("light");
+
+    loadGroups();
+  </script>
+
+  <script src="assets/dashboard-animations.js"></script>
+  <script src="assets/main.js"></script>
+
+</body>
+</html>
