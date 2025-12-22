@@ -161,10 +161,11 @@ const path = require("path");
 app.use(express.static(path.join(__dirname, "frontend")));
 
 // Default route
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "index2.html"));
-});
+app.use(express.static(frontendPath));
 
+app.get("/", (req, res) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
+});
 
 app.use('/uploads', express.static(__dirname + '/uploads'));
 
