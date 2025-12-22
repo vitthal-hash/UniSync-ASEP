@@ -154,14 +154,19 @@ socket.on("vote_poll", async ({ poll_id, option_id }) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 // Serve FRONTEND HTML, CSS, JS files
 const path = require("path");
 app.use(express.static(path.join(__dirname, "../frontend")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+});
+app.use('/uploads', express.static(__dirname + '/uploads'));
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 UniSync backend running on 0.0.0.0:${PORT}`);
 });
 
-app.use('/uploads', express.static(__dirname + '/uploads'));
+
 
