@@ -1,22 +1,31 @@
-// backend/utils/mailer.js
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,              // ✅ REQUIRED
+  secure: false,          // ✅ REQUIRED (true only for 465)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
   }
 });
 
-/**
- * sendOTP(email, otp)
- * Sends a simple HTML email with the OTP.
- */
+// 🔍 IMPORTANT: verify connection once
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ SMTP connection failed:", error);
+  } else {
+    console.log("✅ SMTP ready to send emails");
+  }
+});
+
 async function sendOTP(email, otp) {
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `"UniSync" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "UniSync — Your verification OTP",
     html: `
@@ -26,7 +35,9 @@ async function sendOTP(email, otp) {
         <div style="font-size:24px;font-weight:700;margin:12px 0;">${otp}</div>
         <p>This OTP is valid for 2 minutes.</p>
         <hr/>
-        <p style="font-size:13px;color:#666;">If you did not request this, ignore this email.</p>
+        <p style="font-size:13px;color:#666;">
+          If you did not request this, ignore this email.
+        </p>
       </div>
     `
   };
@@ -34,6 +45,4 @@ async function sendOTP(email, otp) {
   return transporter.sendMail(mailOptions);
 }
 
-module.exports = {
-  sendOTP
-};
+module.exports = { sendOTP };
