@@ -3,9 +3,9 @@ console.log("RUNNING FILE:", __filename);
 const express = require("express");
 
 const http = require("http");
-const app = require("./app");
+const app = require("./backend/app");
 const { Server } = require("socket.io");
-const pool = require("./config/db");
+const pool = require("./backend/config/db");
 
 // Create HTTP server
 const server = http.createServer(app);
@@ -157,11 +157,15 @@ socket.on("vote_poll", async ({ poll_id, option_id }) => {
 const PORT = process.env.PORT || 8080;
 // Serve FRONTEND HTML, CSS, JS files
 const path = require("path");
-app.use(express.static(path.join(__dirname, "../frontend")));
+// Serve frontend
+app.use(express.static(path.join(__dirname, "frontend")));
 
+// Default route
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+  res.sendFile(path.join(__dirname, "frontend", "index2.html"));
 });
+
+
 app.use('/uploads', express.static(__dirname + '/uploads'));
 
 server.listen(PORT, "0.0.0.0", () => {
