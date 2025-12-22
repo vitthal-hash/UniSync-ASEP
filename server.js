@@ -164,7 +164,7 @@ app.use(express.static(path.join(__dirname, "frontend")));
 app.use(express.static(frontendPath));
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(frontendPath, "index.html"));
+  res.sendFile(path.join(frontendPath, "index2.html"));
 });
 
 app.use('/uploads', express.static(__dirname + '/uploads'));
