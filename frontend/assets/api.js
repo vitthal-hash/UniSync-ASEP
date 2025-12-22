@@ -1,6 +1,7 @@
 // frontend/assets/api.js
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://unisync-asep-production.up.railway.app/api";
+
 
 // ----------------------
 // Add Token to Headers
