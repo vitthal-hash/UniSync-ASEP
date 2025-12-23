@@ -1,52 +1,42 @@
 // backend/utils/mailer.js
-const nodemailer = require("nodemailer");
-
-// 🔐 Brevo SMTP – Railway safe configuration
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 465,            // ✅ IMPORTANT for Railway
-  secure: true,         // ✅ REQUIRED with 465
-  auth: {
-    user: process.env.BREVO_SMTP_USER, // SMTP LOGIN from Brevo
-    pass: process.env.BREVO_SMTP_PASS  // SMTP PASSWORD from Brevo
-  },
-  tls: {
-    rejectUnauthorized: false
-  },
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-  socketTimeout: 15000
-});
-
-// Check connection on startup
-transporter.verify((err) => {
-  if (err) {
-    console.error("❌ Brevo SMTP error:", err);
-  } else {
-    console.log("✅ Brevo SMTP ready");
-  }
-});
+const axios = require("axios");
 
 async function sendOTP(email, otp) {
-  return transporter.sendMail({
-    from: `"${process.env.BREVO_SENDER_NAME}" <${process.env.BREVO_SENDER_EMAIL}>`,
-    to: email,
-    subject: "UniSync — Your verification OTP",
-    html: `
-      <div style="font-family:Arial,sans-serif;color:#111;">
-        <h2>UniSync Verification</h2>
-        <p>Your One-Time Password (OTP) is:</p>
-        <div style="font-size:26px;font-weight:bold;letter-spacing:2px;">
-          ${otp}
+  const res = await axios.post(
+    "https://api.brevo.com/v3/smtp/email",
+    {
+      sender: {
+        email: process.env.BREVO_SENDER_EMAIL,
+        name: process.env.BREVO_SENDER_NAME || "UniSync"
+      },
+      to: [{ email }],
+      subject: "UniSync — Your verification OTP",
+      htmlContent: `
+        <div style="font-family:Arial,sans-serif;color:#111;">
+          <h2>UniSync Verification</h2>
+          <p>Your One-Time Password (OTP) is:</p>
+          <div style="font-size:26px;font-weight:bold;letter-spacing:2px;">
+            ${otp}
+          </div>
+          <p>This OTP is valid for <b>2 minutes</b>.</p>
+          <hr/>
+          <p style="font-size:13px;color:#666;">
+            If you did not request this OTP, ignore this email.
+          </p>
         </div>
-        <p>This OTP is valid for <b>2 minutes</b>.</p>
-        <hr/>
-        <p style="font-size:13px;color:#666;">
-          If you did not request this OTP, ignore this email.
-        </p>
-      </div>
-    `
-  });
+      `
+    },
+    {
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      timeout: 10000
+    }
+  );
+
+  return res.data;
 }
 
 module.exports = { sendOTP };
