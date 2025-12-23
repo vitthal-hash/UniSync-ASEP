@@ -343,7 +343,7 @@ renderAnalytics(res);
 
 // 🔥 STEP 1: compute CWES for selected group
 await fetch(
-  `http://localhost:5000/api/analytics/${groupSelect.value}/compute-engagement`,
+  `${window.UNISYNC_BASE_URL}/api/analytics/${groupSelect.value}/compute-engagement`,
   {
     method: "POST",
     headers: {
@@ -453,13 +453,14 @@ function getTopClub(usersWithClubs = []) {
 
 async function loadCWES(groupId) {
   const res = await fetch(
-    `http://localhost:5000/api/analytics/${groupId}/cwes`,
-    {
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("unisync_token")
-      }
+  `${window.UNISYNC_BASE_URL}/api/analytics/${groupId}/cwes`,
+  {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("unisync_token")
     }
-  );
+  }
+);
+
 
   const data = await res.json();
   if (!data.success) return;
