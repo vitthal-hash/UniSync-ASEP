@@ -1,6 +1,9 @@
 // backend/utils/mailer.js
 const nodemailer = require("nodemailer");
 
+console.log("SMTP USER:", process.env.BREVO_SMTP_USER ? "FOUND" : "MISSING");
+console.log("SMTP PASS:", process.env.BREVO_SMTP_PASS ? "FOUND" : "MISSING");
+
 const transporter = nodemailer.createTransport({
   host: "smtp-relay.brevo.com",
   port: 465,
