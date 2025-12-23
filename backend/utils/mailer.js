@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 
 async function sendOTP(email, otp) {
   return transporter.sendMail({
-    from: "UniSync <YOUR_VERIFIED_EMAIL@gmail.com>",
+    from: "UniSync <vm7368514@gmail.com>",
     to: email,
     subject: "UniSync — Your verification OTP",
     html: `<h2>Your OTP is ${otp}</h2>`
