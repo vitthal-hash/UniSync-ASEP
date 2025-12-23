@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>UniSync — Chat</title>
-
+<script src="assets/config.js"></script>
   <!-- Existing app styles (keeps look consistent) -->
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -282,7 +282,8 @@ body.dark .reaction-summary span {
   </style>
 
   <!-- socket.io client (keep same origin you use locally) -->
-  <script src="http://localhost:5000/socket.io/socket.io.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
 </head>
 
 <body class="dashboard-page">
@@ -478,7 +479,8 @@ body.dark .reaction-summary span {
        Imports & constants
        ------------------------- */
     import { GroupsAPI, ChatAPI, AuthAPI } from "./assets/api.js";
-    const API_BASE = "http://localhost:5000/api";
+    const API_BASE = "https://unisync-asep-production.up.railway.app/api";
+
     let selectedTarget = "all";
 
     /* -------------------------
@@ -525,7 +527,10 @@ let adminOnlyChat = false;
     /* -------------------------
        Socket setup
        ------------------------- */
-    const socket = io("http://localhost:5000");
+    const socket = io("https://unisync-asep-production.up.railway.app", {
+  transports: ["websocket", "polling"]
+});
+
     if (user && user.id) {
       socket.emit("user_online", { userId: user.id });
       socket.emit("register_user", user.id);
@@ -1331,7 +1336,7 @@ window.makeAdmin = async (targetUserId) => {
 
   try {
     const res = await fetch(
-      `http://localhost:5000/api/groups/${groupId}/make-admin/${targetUserId}`,
+      `https://unisync-asep-production.up.railway.app/api/groups/${groupId}/make-admin/${targetUserId}`,
       {
         method: "POST",
         headers: {
@@ -1362,7 +1367,7 @@ window.removeAdmin = async (targetUserId) => {
 
   try {
     const res = await fetch(
-      `http://localhost:5000/api/groups/${groupId}/remove-admin/${targetUserId}`,
+      `https://unisync-asep-production.up.railway.app/api/groups/${groupId}/remove-admin/${targetUserId}`,
       {
         method: "POST",
         headers: {
@@ -1553,7 +1558,7 @@ document
     const enabled = e.target.checked;
 
     await fetch(
-      `http://localhost:5000/api/groups/${groupId}/admin-only-chat`,
+      `https://unisync-asep-production.up.railway.app/api/groups/${groupId}/admin-only-chat`,
       {
         method: "POST",
         headers: {
