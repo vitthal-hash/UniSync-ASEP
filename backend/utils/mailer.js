@@ -1,22 +1,27 @@
 // backend/utils/mailer.js
-
 const nodemailer = require("nodemailer");
 
-// ✅ Brevo SMTP transporter (stable, production-safe)
+// 🔐 Brevo SMTP – Railway safe configuration
 const transporter = nodemailer.createTransport({
   host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false, // TLS
+  port: 465,            // ✅ IMPORTANT for Railway
+  secure: true,         // ✅ REQUIRED with 465
   auth: {
-    user: process.env.BREVO_SMTP_USER, // always "apikey"
-    pass: process.env.BREVO_SMTP_PASS  // SMTP key from Brevo
-  }
+    user: process.env.BREVO_SMTP_USER, // SMTP LOGIN from Brevo
+    pass: process.env.BREVO_SMTP_PASS  // SMTP PASSWORD from Brevo
+  },
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 15000
 });
 
-// Optional: verify connection on startup
+// Check connection on startup
 transporter.verify((err) => {
   if (err) {
-    console.error("❌ Brevo SMTP error:", err.message);
+    console.error("❌ Brevo SMTP error:", err);
   } else {
     console.log("✅ Brevo SMTP ready");
   }
