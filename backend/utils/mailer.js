@@ -1,4 +1,6 @@
 // backend/utils/mailer.js
+console.log("🔥 USING BREVO HTTP API MAILER");
+
 const axios = require("axios");
 
 async function sendOTP(email, otp) {
