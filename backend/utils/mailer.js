@@ -1,32 +1,28 @@
 // backend/utils/mailer.js
 const nodemailer = require("nodemailer");
-require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp-relay.brevo.com",
   port: 587,
-  secure: false, // MUST be false for 587
+  secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_SMTP_PASS
   }
 });
 
-// ✅ Verify SMTP connection at startup
-transporter.verify((error, success) => {
+// Verify SMTP connection
+transporter.verify((error) => {
   if (error) {
-    console.error("❌ SMTP connection failed:", error);
+    console.error("❌ Brevo SMTP failed:", error);
   } else {
-    console.log("✅ SMTP ready to send emails");
+    console.log("✅ Brevo SMTP ready");
   }
 });
 
 async function sendOTP(email, otp) {
   return transporter.sendMail({
-    from: `"UniSync" <${process.env.EMAIL_USER}>`,
+    from: "UniSync <vm7368514@gmail.com>",
     to: email,
     subject: "UniSync — Your verification OTP",
     html: `
