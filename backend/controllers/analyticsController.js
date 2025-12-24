@@ -307,32 +307,48 @@ exports.computeEngagementPlaceholder = async (req, res) => {
 
     const users = Object.values(map);
 
-if (!users.length) {
-  const [members] = await pool.execute(
-    `SELECT user_id FROM group_members WHERE group_id = ?`,
-    [groupId]
+// 🔥 ALWAYS initialize CWES for ALL group members
+const [members] = await pool.execute(
+  `SELECT user_id FROM group_members WHERE group_id = ?`,
+  [groupId]
+);
+
+for (const m of members) {
+  const u = users.find(x => x.user_id === m.user_id) || {
+    msg_count: 0,
+    reply_count: 0,
+    reaction_count: 0,
+    vote_count: 0
+  };
+
+  const maxMsg = Math.max(...users.map(x => x.msg_count), 1);
+  const maxResp = Math.max(...users.map(x => x.reply_count + x.vote_count), 1);
+  const maxReact = Math.max(...users.map(x => x.reaction_count), 1);
+
+  const IE = Math.log(1 + u.msg_count) / Math.log(1 + maxMsg);
+  const RE = Math.log(1 + u.reply_count + u.vote_count) / Math.log(1 + maxResp);
+  const SV = Math.log(1 + u.reaction_count) / Math.log(1 + maxReact);
+  const EC = 1;
+
+  const CWES = (0.35 * IE + 0.30 * RE + 0.25 * SV) * (0.7 + 0.3 * EC);
+
+  await pool.execute(
+    `
+    INSERT INTO user_engagement_scores
+    (user_id, group_id, ie_score, re_score, sv_score, ec_score, cwes_score)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE
+      ie_score = VALUES(ie_score),
+      re_score = VALUES(re_score),
+      sv_score = VALUES(sv_score),
+      ec_score = VALUES(ec_score),
+      cwes_score = VALUES(cwes_score),
+      computed_at = CURRENT_TIMESTAMP
+    `,
+    [m.user_id, groupId, IE, RE, SV, EC, CWES]
   );
-
-  for (const m of members) {
-    await pool.execute(
-      `
-      INSERT INTO user_engagement_scores
-      (user_id, group_id, ie_score, re_score, sv_score, ec_score, cwes_score)
-      VALUES (?, ?, 0, 0, 0, 1, 0)
-      ON DUPLICATE KEY UPDATE
-        ie_score = 0,
-        re_score = 0,
-        sv_score = 0,
-        ec_score = 1,
-        cwes_score = 0,
-        computed_at = CURRENT_TIMESTAMP
-      `,
-      [m.user_id, groupId]
-    );
-  }
-
-  // 🔥 DO NOT RETURN EARLY
 }
+
 
 
 
