@@ -32,7 +32,6 @@
 
     canvas {
       width: 100% !important;
-      height: 200px !important;
     }
 
     .analytics-card {
@@ -222,6 +221,20 @@ label,
   background: #f8fafc;
   font-weight: 600;
 }
+/* 🔥 FIX CWES TABLE + CHART VISIBILITY */
+.analytics-card {
+  overflow: visible !important;
+  height: auto !important;
+}
+
+.analytics-body-container {
+  overflow: visible !important;
+}
+
+.analytics-grid {
+  overflow: visible !important;
+}
+
 
   </style>
 </head>
@@ -252,7 +265,8 @@ label,
   </aside>
 
   <!-- MAIN -->
-  <main class="main">
+ <main class="main-content">
+
 
     <!-- Header -->
 <!-- ANALYTICS TOP BANNER -->
@@ -413,7 +427,7 @@ function getTopClub(usersWithClubs = []) {
           </ul>
         </div>
       
-      <div class="analytics-card" style="grid-column:1/-1;">
+      <div class="analytics-card" style="grid-column:1/-1; min-height: 500px;">
   <h3>Group Engagement (CWES)</h3>
 
   <table class="analytics-table" id="cwesTable" style="width:100%; border-collapse:collapse;">
