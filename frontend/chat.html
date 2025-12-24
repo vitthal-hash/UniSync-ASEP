@@ -272,9 +272,24 @@ body.dark .reaction-summary span {
 .reaction-summary span {
   cursor: pointer;
 }
-/* ============================
-   MOBILE CHAT FIX (CRITICAL)
-   ============================ */
+/* ========
+/* ===== DESKTOP SIDEBAR RESET (CRITICAL) ===== */
+@media (min-width: 769px) {
+
+  .sidebar {
+    position: relative;
+    left: 0;
+    width: 260px;          /* keep your original width */
+    height: auto;
+    box-shadow: none;
+  }
+
+  body.sidebar-open {
+    overflow: auto;
+  }
+
+}
+
 @media (max-width: 768px) {
 
   /* Hide sidebar completely by default */
