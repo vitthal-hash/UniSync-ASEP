@@ -307,9 +307,37 @@ exports.computeEngagementPlaceholder = async (req, res) => {
 
     const users = Object.values(map);
 
-    if (!users.length) {
-      return res.json({ success: true, message: "No activity yet" });
-    }
+   // 🔥 IMPORTANT FIX: initialize CWES for all group members
+if (!users.length) {
+  const [members] = await pool.execute(
+    `SELECT user_id FROM group_members WHERE group_id = ?`,
+    [groupId]
+  );
+
+  for (const m of members) {
+    await pool.execute(
+      `
+      INSERT INTO user_engagement_scores
+      (user_id, group_id, ie_score, re_score, sv_score, ec_score, cwes_score)
+      VALUES (?, ?, 0, 0, 0, 1, 0)
+      ON DUPLICATE KEY UPDATE
+        ie_score = 0,
+        re_score = 0,
+        sv_score = 0,
+        ec_score = 1,
+        cwes_score = 0,
+        computed_at = CURRENT_TIMESTAMP
+      `,
+      [m.user_id, groupId]
+    );
+  }
+
+  return res.json({
+    success: true,
+    message: "CWES initialized with zero activity"
+  });
+}
+
 
     const maxMsg = Math.max(...users.map(u => u.msg_count), 1);
     const maxResp = Math.max(...users.map(u => u.reply_count + u.vote_count), 1);
