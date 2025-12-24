@@ -428,6 +428,20 @@ function getTopClub(usersWithClubs = []) {
     </thead>
     <tbody></tbody>
   </table>
+  <!-- ===================== -->
+<!-- CWES VISUAL ANALYSIS -->
+<!-- ===================== -->
+
+<div style="margin-top:30px;">
+  <h3>CWES Score Distribution</h3>
+  <canvas id="cwesDistributionChart"></canvas>
+</div>
+
+<div style="margin-top:30px;">
+  <h3>CWES Trend (Sample Student)</h3>
+  <canvas id="cwesTrendChart"></canvas>
+</div>
+
 </div>
 </div>
     `;
@@ -450,8 +464,15 @@ function getTopClub(usersWithClubs = []) {
   }
   return "Low engagement. Try participating in discussions or polls to stay connected.";
 }
+let cwesDistChart = null;
+let cwesTrendChart = null;
 
 async function loadCWES(groupId) {
+// ===== CWES charts references =====
+if (window.cwesDistChart) window.cwesDistChart.destroy();
+if (window.cwesTrendChart) window.cwesTrendChart.destroy();
+
+
   const res = await fetch(
   `${window.UNISYNC_BASE_URL}/api/analytics/${groupId}/cwes`,
   {
@@ -492,8 +513,58 @@ tr.innerHTML = `
 `;
 
     tbody.appendChild(tr);
+    
   });
+  // ===============================
+// CWES DISTRIBUTION CHART
+// ===============================
+const scores = data.members.map(m => Number(m.cwes_score));
+
+const safe = scores.filter(s => s < 0.3).length;
+const moderate = scores.filter(s => s >= 0.3 && s < 0.7).length;
+const high = scores.filter(s => s >= 0.7).length;
+
+cwesDistChart = new Chart(document.getElementById("cwesDistributionChart"), {
+  type: "bar",
+  data: {
+    labels: ["Safe", "Moderate", "High Risk"],
+    datasets: [{
+      data: [safe, moderate, high],
+      backgroundColor: ["#22c55e", "#f59e0b", "#ef4444"]
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false
+  }
+});
+// ===============================
+// REAL CWES MEMBER-WISE GRAPH
+// ===============================
+const memberNames = data.members.map(m => m.full_name);
+const memberScores = data.members.map(m => Number(m.cwes_score));
+
+window.cwesTrendChart = new Chart(
+  document.getElementById("cwesTrendChart"),
+  {
+    type: "line",
+    data: {
+      labels: memberNames,
+      datasets: [{
+        label: "CWES Score",
+        data: memberScores,
+        borderWidth: 2,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  }
+);
 }
+
 
   function drawPie(id, arr=[], colors=["#6366f1","#22c55e","#f59e0b","#ef4444"], key="name") {
     new Chart(document.getElementById(id), {
