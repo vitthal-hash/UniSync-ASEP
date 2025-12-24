@@ -248,6 +248,11 @@ canvas {
 .analytics-table td {
   color: #111827 !important;
 }
+/* Override ONLY for CWES charts */
+.cwes-canvas {
+  height: 320px !important;
+  max-height: 320px;
+}
 
 
   </style>
@@ -463,12 +468,12 @@ analyticsArea.innerHTML = `
  <div class="analytics-card" style="margin-top:30px; height: 320px;">
 
     <h3>CWES Score Distribution</h3>
-    <canvas id="cwesDistributionChart"></canvas>
+   <canvas id="cwesDistributionChart" class="cwes-canvas"></canvas>
   </div>
 
   <div class="analytics-card" style="margin-top:30px; height: 320px;">
     <h3>CWES Trend (Member-wise)</h3>
-    <canvas id="cwesTrendChart"></canvas>
+    <canvas id="cwesTrendChart" class="cwes-canvas"></canvas>
   </div>
 `;
 
