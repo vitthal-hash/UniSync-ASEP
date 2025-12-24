@@ -375,7 +375,8 @@ canvas {
 renderAnalytics(res);
 
 // 🔥 STEP 1: compute CWES for selected group
-await fetch(
+// 🔥 STEP 1: compute CWES for selected group
+const computeRes = await fetch(
   `${window.UNISYNC_BASE_URL}/api/analytics/${groupSelect.value}/compute-engagement`,
   {
     method: "POST",
@@ -385,8 +386,14 @@ await fetch(
   }
 );
 
-// 🔥 STEP 2: now fetch CWES
-loadCWES(groupSelect.value);
+const computeData = await computeRes.json();
+
+// 🔥 STEP 2: fetch CWES AFTER compute finishes
+if (computeData.success) {
+  setTimeout(() => {
+    loadCWES(groupSelect.value);
+  }, 500);
+}
 
 
 });
