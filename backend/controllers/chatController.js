@@ -1,4 +1,5 @@
 // backend/controllers/chatController.js
+
 async function emitToFilteredUsers(io, groupId, userId, finalMessage) {
   // sender always gets the message
   io.to(String(userId)).emit("new_message", finalMessage);
@@ -24,6 +25,75 @@ const pool = require("../config/db");
  * - Sorted by created_at ascending
  * - Includes sender_id, sender_name, message_content, timestamp
  */
+
+exports.uploadFileMessage = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const userId = req.user.userId;
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
+    const fileUrl = req.file.path; // ✅ Cloudinary URL
+
+    const target = (req.body.target || "all").toLowerCase();
+
+    const [insertResult] = await pool.execute(
+      `INSERT INTO messages 
+       (group_id, sender_id, message_type, attachment_url, attachment_name, mime_type, target)
+       VALUES (?, ?, 'file', ?, ?, ?, ?)`,
+      [
+        groupId,
+        userId,
+        fileUrl,
+        req.file.originalname,
+        req.file.mimetype,
+        target
+      ]
+    );
+
+    const messageId = insertResult.insertId;
+
+    const [[userRow]] = await pool.execute(
+      "SELECT full_name FROM users WHERE id = ?",
+      [userId]
+    );
+
+    const finalMessage = {
+      id: messageId,
+      sender_id: userId,
+      sender_name: userRow.full_name,
+      message_type: "file",
+      attachment_url: fileUrl,
+      attachment_name: req.file.originalname,
+      mime_type: req.file.mimetype,
+      created_at: new Date()
+    };
+
+    const io = req.app.get("socketio");
+
+    io.to(String(userId)).emit("new_message", finalMessage);
+
+    const [receivers] = await pool.execute(
+      "SELECT user_id FROM group_members WHERE group_id = ?",
+      [groupId]
+    );
+
+    receivers.forEach(r => {
+      if (r.user_id !== userId) {
+        io.to(String(r.user_id)).emit("new_message", finalMessage);
+      }
+    });
+
+    res.json({ success: true, data: finalMessage });
+
+  } catch (err) {
+    console.error("uploadFileMessage error:", err);
+    res.status(500).json({ success: false });
+  }
+};
+
 exports.getMessages = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -417,129 +487,7 @@ return res.json({ success: true });
   }
 };
 
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
 
-// Storage for uploads
-const uploadDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const uniqueName = Date.now() + "-" + Math.random().toString(36).substring(2, 8) + ext;
-    cb(null, uniqueName);
-  }
-});
-
-const upload = multer({ storage });
-
-exports.uploadFileMessage = [
-  upload.single("file"),
-  async (req, res) => {
-    try {
-      const { groupId } = req.params;
-      const userId = req.user.userId;
-
-      const [memberCheck] = await pool.execute(
-        "SELECT id FROM group_members WHERE user_id = ? AND group_id = ?",
-        [userId, groupId]
-      );
-
-      if (memberCheck.length === 0) {
-        return res.status(403).json({ success: false, message: "Not allowed" });
-      }
-
-      if (!req.file) {
-        return res.status(400).json({ success: false, message: "No file uploaded" });
-      }
-
-      const fileUrl = `http://localhost:5000/uploads/${req.file.filename}`;
-
-
-     const target = (req.body.target || "all").toLowerCase();
-
-const [insertResult] = await pool.execute(
-  `INSERT INTO messages 
-   (group_id, sender_id, message_type, attachment_url, attachment_name, mime_type, target)
-   VALUES (?, ?, 'file', ?, ?, ?, ?)`,
-  [groupId, userId, fileUrl, req.file.originalname, req.file.mimetype, target]
-);
-
-
-      const messageId = insertResult.insertId;
-
-      const [userData] = await pool.execute(
-        "SELECT full_name FROM users WHERE id = ? LIMIT 1",
-        [userId]
-      );
-
-   const finalMessage = {
-  id: messageId,
-  sender_id: userId,
-  sender_name: userData[0].full_name,
-  message_type: "file",
-  attachment_url: fileUrl,
-  attachment_name: req.file.originalname,
-  mime_type: req.file.mimetype,
-  reply_to: req.body.reply_to || null,   // ⭐ ADD THIS
-  created_at: new Date()
-};
-
-
-   io.to(String(userId)).emit("new_message", finalMessage);
-
-// send to everyone in group (file upload currently does not support filtering)
-// ⭐ APPLY TARGET FILTERING FOR FILE UPLOADS ⭐
-
-
-let sql = "";
-let params = [groupId];
-
-if (target === "admins") {
-  sql = "SELECT user_id FROM group_members WHERE group_id = ? AND is_admin = 1";
-}
-else if (target === "girls") {
-  sql = `
-    SELECT gm.user_id
-    FROM group_members gm
-    JOIN users u ON gm.user_id = u.id
-    WHERE gm.group_id = ? AND LOWER(u.gender) LIKE 'f%'
-  `;
-}
-else if (target === "boys") {
-  sql = `
-    SELECT gm.user_id
-    FROM group_members gm
-    JOIN users u ON gm.user_id = u.id
-    WHERE gm.group_id = ? AND LOWER(u.gender) LIKE 'm%'
-  `;
-}
-else {
-  sql = "SELECT user_id FROM group_members WHERE group_id = ?";
-}
-
-const [receivers] = await pool.execute(sql, params);
-
-// sender always gets message
-io.to(String(userId)).emit("new_message", finalMessage);
-
-// send only to filtered users
-receivers.forEach(r => {
-  if (r.user_id !== userId) {
-    io.to(String(r.user_id)).emit("new_message", finalMessage);
-  }
-});
-
-      return res.json({ success: true, data: finalMessage });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ success: false, message: "Server error" });
-    }
-  }
-];
 exports.markMessageRead = async (req, res) => {
   const userId = req.user.userId;
   const { messageId } = req.params;

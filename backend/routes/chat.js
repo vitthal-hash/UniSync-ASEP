@@ -13,7 +13,15 @@ router.post("/:groupId/poll", auth, chatController.createPoll);
 // Send message through REST API (Socket emits internally)
 // (This is used when frontend submits via API instead of socket)
 router.post("/:groupId/send", auth, chatController.sendMessage);
-router.post("/:groupId/upload", auth, chatController.uploadFileMessage);
+const upload = require("../middlewares/upload");
+
+router.post(
+  "/:groupId/upload",
+  auth,
+  upload.single("file"),
+  chatController.uploadFileMessage
+);
+
 router.post("/:messageId/react", auth, chatController.reactToMessage);
 
 
