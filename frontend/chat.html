@@ -305,9 +305,7 @@ body.dark .reaction-summary span {
   }
 
   /* Show sidebar when hamburger is clicked */
-  .sidebar.open {
-    left: 0;
-  }
+ 
 
   /* Chat takes full screen */
   .chat-main {
@@ -321,6 +319,75 @@ body.dark .reaction-summary span {
   }
 
   /* Message bubbles adapt better */
+  .msg {
+    max-width: 90%;
+  }
+}
+/* =========================
+   DESKTOP — DO NOT TOUCH
+   ========================= */
+@media (min-width: 769px) {
+  .sidebar {
+    position: relative;
+    left: 0;
+    width: 260px;
+    height: auto;
+  }
+
+  .chat-main {
+    flex: 1;
+    width: auto;
+    border-radius: 24px 0 0 24px;
+  }
+
+  .hamburger-btn {
+    display: none;
+  }
+}
+
+/* =========================
+   MOBILE CHAT FIX (ONLY)
+   ========================= */
+@media (max-width: 768px) {
+
+  /* show hamburger */
+  .hamburger-btn {
+    display: inline-block;
+    font-size: 22px;
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  /* sidebar overlay */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 260px;
+    height: 100vh;
+    background: #000;
+    z-index: 3000;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  /* chat takes full screen */
+  .chat-main {
+    width: 100%;
+    border-radius: 0;
+  }
+
+  /* prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* better bubbles */
   .msg {
     max-width: 90%;
   }
