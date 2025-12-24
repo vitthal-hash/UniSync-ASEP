@@ -506,8 +506,14 @@ let cwesTrendChart = null;
 
 async function loadCWES(groupId) {
 // ===== CWES charts references =====
-if (window.cwesDistChart) window.cwesDistChart.destroy();
-if (window.cwesTrendChart) window.cwesTrendChart.destroy();
+if (cwesDistChart instanceof Chart) {
+  cwesDistChart.destroy();
+}
+
+if (cwesTrendChart instanceof Chart) {
+  cwesTrendChart.destroy();
+}
+
 
 
   const res = await fetch(
