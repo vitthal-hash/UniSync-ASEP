@@ -539,3 +539,53 @@ footer {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+/* ===== Hamburger button ===== */
+.hamburger-btn {
+  display: none;
+  font-size: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+/* ===== Mobile Chat Layout ===== */
+@media (max-width: 768px) {
+
+  .hamburger-btn {
+    display: inline-block;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    height: 100%;
+    width: 260px;
+    background: #fff;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  body.sidebar-open {
+    overflow: hidden;
+  }
+
+  .chat-window {
+    width: 100%;
+  }
+
+  .msg {
+    max-width: 75%;
+    word-wrap: break-word;
+  }
+
+  input, textarea {
+    font-size: 16px;
+  }
+}

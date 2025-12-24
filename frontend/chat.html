@@ -300,7 +300,7 @@ body.dark .reaction-summary span {
 
   <div class="dashboard-container">
     <!-- SIDEBAR -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="logo">
         <i class="fas fa-sync-alt"></i>
         <span>Uni<span>Sync</span></span>
@@ -342,6 +342,8 @@ body.dark .reaction-summary span {
     <!-- MAIN CHAT CONTENT -->
     <main class="chat-main">
       <div class="chat-header">
+        <button id="hamburgerBtn" class="hamburger-btn">☰</button>
+
         <div class="chat-info">
           <div class="chat-avatar" id="groupAvatar">G</div>
           <div class="chat-details">
@@ -1685,5 +1687,27 @@ chatWindow.addEventListener("click", async (e) => {
 
   <!-- keep main.js for theme persistence if you want (safe to include) -->
   <script src="assets/main.js"></script>
+  <script>
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+  const sidebar = document.getElementById("sidebar");
+
+  hamburgerBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    document.body.classList.toggle("sidebar-open");
+  });
+
+  document.addEventListener("click", (e) => {
+    if (
+      window.innerWidth <= 768 &&
+      sidebar.classList.contains("open") &&
+      !sidebar.contains(e.target) &&
+      !hamburgerBtn.contains(e.target)
+    ) {
+      sidebar.classList.remove("open");
+      document.body.classList.remove("sidebar-open");
+    }
+  });
+</script>
+
 </body>
 </html>
