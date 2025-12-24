@@ -307,7 +307,6 @@ exports.computeEngagementPlaceholder = async (req, res) => {
 
     const users = Object.values(map);
 
-   // 🔥 IMPORTANT FIX: initialize CWES for all group members
 if (!users.length) {
   const [members] = await pool.execute(
     `SELECT user_id FROM group_members WHERE group_id = ?`,
@@ -332,11 +331,9 @@ if (!users.length) {
     );
   }
 
-  return res.json({
-    success: true,
-    message: "CWES initialized with zero activity"
-  });
+  // 🔥 DO NOT RETURN EARLY
 }
+
 
 
     const maxMsg = Math.max(...users.map(u => u.msg_count), 1);
