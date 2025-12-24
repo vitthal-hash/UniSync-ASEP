@@ -409,66 +409,64 @@ function getTopClub(usersWithClubs = []) {
 }
 
   function renderAnalytics(d) {
-    analyticsArea.innerHTML = `
-      <div class="analytics-grid">
-        <div class="analytics-card"><h3>Skills</h3><canvas id="skillsChart"></canvas></div>
-        <div class="analytics-card"><h3>Interests</h3><canvas id="interestsChart"></canvas></div>
-        <div class="analytics-card"><h3>Languages</h3><canvas id="languagesChart"></canvas></div>
-        <div class="analytics-card"><h3>Clubs</h3><canvas id="clubsChart"></canvas></div>
+analyticsArea.innerHTML = `
+  <div class="analytics-grid">
+    <div class="analytics-card"><h3>Skills</h3><canvas id="skillsChart"></canvas></div>
+    <div class="analytics-card"><h3>Interests</h3><canvas id="interestsChart"></canvas></div>
+    <div class="analytics-card"><h3>Languages</h3><canvas id="languagesChart"></canvas></div>
+    <div class="analytics-card"><h3>Clubs</h3><canvas id="clubsChart"></canvas></div>
 
-        <div class="analytics-card"><h3>Peak Active Hours</h3><canvas id="peakHoursChart"></canvas></div>
-        <div class="analytics-card"><h3>Least Active Hours</h3><canvas id="lowHoursChart"></canvas></div>
-        <div class="analytics-card"><h3>City Distribution</h3><canvas id="cityChart"></canvas></div>
-        <div class="analytics-card"><h3>Gender Ratio</h3><canvas id="genderChart"></canvas></div>
+    <div class="analytics-card"><h3>Peak Active Hours</h3><canvas id="peakHoursChart"></canvas></div>
+    <div class="analytics-card"><h3>Least Active Hours</h3><canvas id="lowHoursChart"></canvas></div>
+    <div class="analytics-card"><h3>City Distribution</h3><canvas id="cityChart"></canvas></div>
+    <div class="analytics-card"><h3>Gender Ratio</h3><canvas id="genderChart"></canvas></div>
 
-        <div class="analytics-card" style="grid-column:1/-1;">
-          <h3>Insights</h3>
-          <ul>
-  ${d.worldClassInsights.map(i => `<li>${i}</li>`).join("")}
-  <li><b>${getTopClub(d.usersWithClubs)}</b></li>
-</ul>
+    <div class="analytics-card" style="grid-column:1/-1;">
+      <h3>Insights</h3>
+      <ul>
+        ${d.worldClassInsights.map(i => `<li>${i}</li>`).join("")}
+        <li><b>${getTopClub(d.usersWithClubs)}</b></li>
+      </ul>
+    </div>
 
-        </div>
+    <div class="analytics-card" style="grid-column:1/-1;">
+      <h3>Members & Clubs</h3>
+      <ul>
+        ${d.usersWithClubs.map(u=>`<li><b>${u.name}</b> – ${u.clubs.join(", ")}</li>`).join("")}
+      </ul>
+    </div>
 
-        <div class="analytics-card" style="grid-column:1/-1;">
-          <h3>Members & Clubs</h3>
-          <ul>
-            ${d.usersWithClubs.map(u=>`<li><b>${u.name}</b> – ${u.clubs.join(", ")}</li>`).join("")}
-          </ul>
-        </div>
-      
-      <div class="analytics-card" style="grid-column:1/-1; min-height: 500px;">
-  <h3>Group Engagement (CWES)</h3>
+    <!-- CWES TABLE CARD -->
+    <div class="analytics-card" style="grid-column:1/-1;">
+      <h3>Group Engagement (CWES)</h3>
 
-  <table class="analytics-table" id="cwesTable" style="width:100%; border-collapse:collapse;">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Member</th>
-        <th>CWES Score</th>
-        <th>Status</th>
-        <th>Suggestion</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <!-- ===================== -->
-<!-- CWES VISUAL ANALYSIS -->
-<!-- ===================== -->
+      <table class="analytics-table" id="cwesTable" style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Member</th>
+            <th>CWES Score</th>
+            <th>Status</th>
+            <th>Suggestion</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 
-<div style="margin-top:30px;">
-  <h3>CWES Score Distribution</h3>
-  <canvas id="cwesDistributionChart"></canvas>
-</div>
+  <!-- CWES CHARTS (OUTSIDE GRID, BUT INSIDE analyticsArea) -->
+  <div class="analytics-card" style="margin-top:30px;">
+    <h3>CWES Score Distribution</h3>
+    <canvas id="cwesDistributionChart"></canvas>
+  </div>
 
-<div style="margin-top:30px;">
-  <h3>CWES Trend (Sample Student)</h3>
-  <canvas id="cwesTrendChart"></canvas>
-</div>
+  <div class="analytics-card" style="margin-top:30px;">
+    <h3>CWES Trend (Member-wise)</h3>
+    <canvas id="cwesTrendChart"></canvas>
+  </div>
+`;
 
-</div>
-</div>
-    `;
 
     drawPie("skillsChart", d.skillsDistribution);
     drawPie("interestsChart", d.interestsDistribution);
