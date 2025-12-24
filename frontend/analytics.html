@@ -234,6 +234,16 @@ label,
 .analytics-grid {
   overflow: visible !important;
 }
+/* 🔥 FORCE CWES TABLE TEXT VISIBILITY */
+.analytics-table td {
+  color: #111827 !important;
+  background: #ffffff !important;
+}
+
+/* 🔥 FORCE CHART VISIBILITY */
+canvas {
+  background: #ffffff !important;
+}
 
 
   </style>
@@ -542,10 +552,12 @@ cwesDistChart = new Chart(document.getElementById("cwesDistributionChart"), {
   type: "bar",
   data: {
     labels: ["Safe", "Moderate", "High Risk"],
-    datasets: [{
-      data: [safe, moderate, high],
-      backgroundColor: ["#22c55e", "#f59e0b", "#ef4444"]
-    }]
+   datasets: [{
+  data: [safe, moderate, high],
+  backgroundColor: ["#22c55e", "#f59e0b", "#ef4444"],
+  borderColor: "#111827"
+}]
+
   },
   options: {
     responsive: true,
@@ -564,12 +576,15 @@ window.cwesTrendChart = new Chart(
     type: "line",
     data: {
       labels: memberNames,
-      datasets: [{
-        label: "CWES Score",
-        data: memberScores,
-        borderWidth: 2,
-        fill: false
-      }]
+     datasets: [{
+  label: "CWES Score",
+  data: memberScores,
+  borderColor: "#2563eb",
+  backgroundColor: "#2563eb",
+  borderWidth: 2,
+  fill: false
+}]
+
     },
     options: {
       responsive: true,
