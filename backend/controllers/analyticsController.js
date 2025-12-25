@@ -390,13 +390,7 @@ for (const m of members) {
           CWES
         ]
       );
-      await pool.execute(
-  `
-  INSERT INTO user_cwes_history (user_id, group_id, cwes_score)
-  VALUES (?, ?, ?)
-  `,
-  [m.user_id, groupId, CWES]
-);
+ 
 
     }
 
