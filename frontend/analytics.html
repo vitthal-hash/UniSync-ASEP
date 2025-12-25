@@ -388,10 +388,11 @@ const computeData = await computeRes.json();
 // 2️⃣ Render analytics UI
 renderAnalytics(res);
 
-// 3️⃣ THEN load CWES
 if (computeData.success) {
   loadCWES(groupSelect.value);
+  loadMyCWESTrend(groupSelect.value);
 }
+
 
 
 });
@@ -586,31 +587,53 @@ cwesDistChart = new Chart(document.getElementById("cwesDistributionChart"), {
 // ===============================
 // REAL CWES MEMBER-WISE GRAPH
 // ===============================
-const memberNames = data.members.map(m => m.full_name);
-const memberScores = data.members.map(m => Number(m.cwes_score));
+}
+async function loadMyCWESTrend(groupId) {
+  const userId = getLoggedInUserId();
 
-window.cwesTrendChart = new Chart(
-  document.getElementById("cwesTrendChart"),
-  {
-    type: "line",
-    data: {
-      labels: memberNames,
-     datasets: [{
-  label: "CWES Score",
-  data: memberScores,
-  borderColor: "#2563eb",
-  backgroundColor: "#2563eb",
-  borderWidth: 2,
-  fill: false
-}]
-
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false
+  const res = await fetch(
+    `${window.UNISYNC_BASE_URL}/api/analytics/${groupId}/cwes-trend/${userId}`,
+    {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("unisync_token")
+      }
     }
+  );
+
+  const json = await res.json();
+  if (!json.success) return;
+
+  const labels = json.data.map(d =>
+    new Date(d.recorded_at).toLocaleDateString()
+  );
+
+  const scores = json.data.map(d => Number(d.cwes_score));
+
+  if (window.cwesTrendChart instanceof Chart) {
+    window.cwesTrendChart.destroy();
   }
-);
+
+  window.cwesTrendChart = new Chart(
+    document.getElementById("cwesTrendChart"),
+    {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: "My CWES Progress",
+          data: scores,
+          borderColor: "#2563eb",
+          borderWidth: 2,
+          tension: 0.4,
+          fill: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    }
+  );
 }
 
 

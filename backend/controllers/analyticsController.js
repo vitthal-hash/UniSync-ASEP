@@ -390,6 +390,14 @@ for (const m of members) {
           CWES
         ]
       );
+      await pool.execute(
+  `
+  INSERT INTO user_cwes_history (user_id, group_id, cwes_score)
+  VALUES (?, ?, ?)
+  `,
+  [m.user_id, groupId, CWES]
+);
+
     }
 
     return res.json({
@@ -806,6 +814,32 @@ exports.getCWESForGroup = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch engagement scores"
+    });
+  }
+};
+exports.getUserCWESTrend = async (req, res) => {
+  try {
+    const { groupId, userId } = req.params;
+
+    const [rows] = await pool.execute(
+      `
+      SELECT cwes_score, recorded_at
+      FROM user_cwes_history
+      WHERE group_id = ? AND user_id = ?
+      ORDER BY recorded_at ASC
+      `,
+      [groupId, userId]
+    );
+
+    return res.json({
+      success: true,
+      data: rows
+    });
+  } catch (err) {
+    console.error("CWES trend error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch CWES trend"
     });
   }
 };

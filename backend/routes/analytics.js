@@ -63,5 +63,10 @@ router.get(
   auth,
   analyticsController.getCWESForGroup
 );
+router.get(
+  "/:groupId/cwes-trend/:userId",
+  auth,
+  analyticsController.getUserCWESTrend
+);
 
 module.exports = router;
