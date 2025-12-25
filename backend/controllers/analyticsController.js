@@ -348,6 +348,13 @@ for (const m of members) {
     [m.user_id, groupId, IE, RE, SV, EC, CWES]
   );
 }
+await pool.execute(
+  `
+  INSERT INTO user_cwes_history (user_id, group_id, cwes_score)
+  VALUES (?, ?, ?)
+  `,
+  [m.user_id, groupId, CWES]
+);
 
 
 
@@ -838,21 +845,4 @@ exports.getUserCWESTrend = async (req, res) => {
   }
 };
 // TEMP: run once to create CWES history table
-exports._initCreateCWESHistory = async (req, res) => {
-  try {
-    await pool.execute(`
-      CREATE TABLE IF NOT EXISTS user_cwes_history (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        group_id INT NOT NULL,
-        cwes_score DECIMAL(6,4) NOT NULL,
-        recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX (user_id, group_id)
-      )
-    `);
 
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-};

@@ -68,9 +68,6 @@ router.get(
   auth,
   analyticsController.getUserCWESTrend
 );
-router.get(
-  "/_init/create-cwes-history",
-  analyticsController._initCreateCWESHistory
-);
+
 
 module.exports = router;
