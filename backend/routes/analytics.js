@@ -70,7 +70,6 @@ router.get(
 );
 router.get(
   "/_init/create-cwes-history",
-  auth,
   analyticsController._initCreateCWESHistory
 );
 
