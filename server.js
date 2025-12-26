@@ -100,14 +100,29 @@ socket.on("register_user", (userId) => {
 // ================================
 socket.on("vote_poll", async ({ poll_id, option_id }) => {
   try {
-    // prevent duplicate vote
+    const userId = socket.userId;
+
+    // 1️⃣ REMOVE user's previous vote for this poll
     await pool.execute(
-      `INSERT IGNORE INTO poll_votes (poll_id, option_id, user_id)
-       VALUES (?, ?, ?)`,
-      [poll_id, option_id, socket.userId]
+      `
+      DELETE pv
+      FROM poll_votes pv
+      JOIN poll_options po ON pv.option_id = po.id
+      WHERE po.poll_id = ? AND pv.user_id = ?
+      `,
+      [poll_id, userId]
     );
 
-    // fetch updated poll state
+    // 2️⃣ INSERT new vote
+    await pool.execute(
+      `
+      INSERT INTO poll_votes (option_id, user_id)
+      VALUES (?, ?)
+      `,
+      [option_id, userId]
+    );
+
+    // 3️⃣ Fetch updated poll data
     const [rows] = await pool.execute(
       `
       SELECT 
@@ -123,6 +138,7 @@ socket.on("vote_poll", async ({ poll_id, option_id }) => {
       [poll_id]
     );
 
+    // 4️⃣ Group votes per option
     const optionMap = {};
     rows.forEach(r => {
       if (!optionMap[r.option_id]) {
@@ -140,6 +156,7 @@ socket.on("vote_poll", async ({ poll_id, option_id }) => {
       }
     });
 
+    // 5️⃣ Emit updated poll to everyone
     io.emit("poll_update", {
       poll_id,
       options: Object.values(optionMap)
@@ -149,6 +166,7 @@ socket.on("vote_poll", async ({ poll_id, option_id }) => {
     console.error("vote_poll error:", err);
   }
 });
+
 
 
 });

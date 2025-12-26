@@ -107,7 +107,28 @@
     #replyPreview { background: linear-gradient(135deg, rgba(99,102,241,.07), rgba(59,130,246,.07)); border-left:4px solid var(--primary-color); margin:.5rem 0; padding:.75rem; border-radius:12px; display:flex; justify-content:space-between; align-items:center; animation:slideDown .3s ease; }
     @keyframes slideDown { from{opacity:0; transform:translateY(-20px)} to{opacity:1; transform:translateY(0)} }
 
-    .filter-menu { position:absolute; bottom:100%; left:0; background:var(--msg-bg); border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,.2); padding:.5rem; display:none; min-width:200px; z-index:100; border:1px solid var(--msg-border); }
+    .filter-menu {
+  position: absolute;
+  bottom: calc(100% + 8px);   /* small gap above input bar */
+  left: 0;
+  background: var(--msg-bg);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  padding: 6px;
+  min-width: 220px;
+  z-index: 5000;              /* 🔥 important */
+  display: none;
+}
+.filter-menu::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 16px;
+  border-width: 8px 8px 0 8px;
+  border-style: solid;
+  border-color: var(--msg-bg) transparent transparent transparent;
+}
+
     .filter-menu.show { display:block; animation:slideDown .2s ease; }
     .msg-filter-option { padding:.75rem 1rem; border-radius:8px; cursor:pointer; transition:all .3s ease; color:var(--msg-text); }
     .msg-filter-option:hover { background:var(--primary-color); color:white; }
@@ -573,22 +594,73 @@ body.dark .reaction-summary span {
     </div>
   </div>
 <div id="pollPopup" class="popup">
-  <div class="popup-content">
-    <h3>Create Poll</h3>
+  <div class="popup-content" style="max-width:420px">
 
-    <input id="pollQuestion" placeholder="Poll question" />
+    <h3 style="margin-bottom:16px">📊 Create Poll</h3>
 
-    <div id="pollOptions">
+    <!-- Question -->
+    <input id="pollQuestion"
+           placeholder="Enter poll question"
+           style="
+             width:100%;
+             padding:10px;
+             margin-bottom:12px;
+             border-radius:10px;
+             border:1px solid #ccc;
+           " />
+
+    <!-- Options -->
+    <div id="pollOptions" style="display:flex; flex-direction:column; gap:10px;">
       <input placeholder="Option 1" />
       <input placeholder="Option 2" />
     </div>
 
-    <button id="addPollOption">+ Add option</button>
-    <br><br>
-    <button id="sendPollBtn">Send Poll</button>
-    <button onclick="closePoll()">Cancel</button>
+    <!-- Add option -->
+    <button id="addPollOption"
+            style="
+              margin-top:12px;
+              background:#eef2ff;
+              border:none;
+              padding:8px;
+              border-radius:8px;
+              cursor:pointer;
+              font-weight:600;
+            ">
+      ➕ Add option
+    </button>
+
+    <!-- Actions -->
+    <div style="display:flex; gap:10px; margin-top:18px;">
+      <button id="sendPollBtn"
+              style="
+                flex:1;
+                background:#6366f1;
+                color:white;
+                border:none;
+                padding:10px;
+                border-radius:10px;
+                font-weight:600;
+                cursor:pointer;
+              ">
+        Send Poll
+      </button>
+
+      <button onclick="closePoll()"
+              style="
+                flex:1;
+                background:#eee;
+                border:none;
+                padding:10px;
+                border-radius:10px;
+                cursor:pointer;
+              ">
+        Cancel
+      </button>
+    </div>
+
   </div>
 </div>
+
   <!-- Main JS (module) - merged UI + full working logic from your earlier file -->
   <script type="module">
     /* -------------------------
