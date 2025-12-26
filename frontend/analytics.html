@@ -371,6 +371,8 @@ canvas {
   document.getElementById("analyticsEmpty").style.display = "none";
 
   const res = await AnalyticsAPI.groupAnalytics(groupSelect.value);
+  const weeklyPeaks = await loadWeeklyPeaks(groupSelect.value);
+
   if (!res?.success) return;
 // 1️⃣ First compute CWES
 const computeRes = await fetch(
@@ -387,6 +389,8 @@ const computeData = await computeRes.json();
 
 // 2️⃣ Render analytics UI
 renderAnalytics(res);
+renderPeakAnalytics(weeklyPeaks);
+
 
 if (computeData.success) {
   loadCWES(groupSelect.value);
@@ -422,6 +426,21 @@ function getTopClub(usersWithClubs = []) {
 
   return `Clubs with maximum members (${maxCount} members each): ${topClubs.join(", ")}.`;
 }
+async function loadWeeklyPeaks(groupId) {
+  const res = await fetch(
+    `${window.UNISYNC_BASE_URL}/api/analytics/${groupId}/weekly-peaks`,
+    {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("unisync_token")
+      }
+    }
+  );
+
+  const data = await res.json();
+  if (!data.success) return [];
+
+  return data.data;
+}
 
   function renderAnalytics(d) {
 analyticsArea.innerHTML = `
@@ -443,6 +462,33 @@ analyticsArea.innerHTML = `
         <li><b>${getTopClub(d.usersWithClubs)}</b></li>
       </ul>
     </div>
+<!-- ===============================
+     DAILY & WEEKLY PEAK ANALYTICS
+     =============================== -->
+
+<div class="analytics-card">
+  <h3>Today's Peak Activity</h3>
+  <ul id="todayPeakBox">
+    <li>Loading...</li>
+  </ul>
+</div>
+
+<div class="analytics-card" style="grid-column:1/-1;">
+  <h3>Last 7 Days Peak Activity</h3>
+
+  <table class="analytics-table" style="width:100%;">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Peak Msg Hour</th>
+        <th>Messages</th>
+        <th>Peak Online Hour</th>
+        <th>Online Users</th>
+      </tr>
+    </thead>
+    <tbody id="weeklyPeakTable"></tbody>
+  </table>
+</div>
 
     <div class="analytics-card" style="grid-column:1/-1;">
       <h3>Members & Clubs</h3>
@@ -588,6 +634,38 @@ cwesDistChart = new Chart(document.getElementById("cwesDistributionChart"), {
 // REAL CWES MEMBER-WISE GRAPH
 // ===============================
 }
+function renderPeakAnalytics(rows) {
+  const todayBox = document.getElementById("todayPeakBox");
+  const table = document.getElementById("weeklyPeakTable");
+
+  if (!rows.length) {
+    todayBox.innerHTML = "<li>No data yet</li>";
+    table.innerHTML = "";
+    return;
+  }
+
+  // Today's data (first row)
+  const today = rows[0];
+
+  todayBox.innerHTML = `
+    <li>⏰ Peak Messages: ${today.peak_message_hour}:00 – ${today.peak_message_hour + 1}:00
+        (${today.peak_message_count} msgs)</li>
+    <li>🟢 Peak Online: ${today.peak_online_hour}:00 – ${today.peak_online_hour + 1}:00
+        (${today.peak_online_count} users)</li>
+  `;
+
+  // Weekly table
+  table.innerHTML = rows.map(r => `
+    <tr>
+      <td>${new Date(r.activity_date).toLocaleDateString()}</td>
+      <td>${r.peak_message_hour}:00 – ${r.peak_message_hour + 1}:00</td>
+      <td>${r.peak_message_count}</td>
+      <td>${r.peak_online_hour}:00 – ${r.peak_online_hour + 1}:00</td>
+      <td>${r.peak_online_count}</td>
+    </tr>
+  `).join("");
+}
+
 async function loadMyCWESTrend(groupId) {
   const userId = getLoggedInUserId();
 
