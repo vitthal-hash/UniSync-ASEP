@@ -890,4 +890,39 @@ exports.computeDailyGroupPeaks = async () => {
     console.error("❌ Daily peak compute failed:", err);
   }
 };
+// ===============================
+// FETCH WEEKLY PEAK SUMMARY
+// ===============================
+exports.getWeeklyPeakSummary = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    const [rows] = await pool.execute(
+      `
+      SELECT
+        activity_date,
+        peak_message_hour,
+        peak_message_count,
+        peak_online_hour,
+        peak_online_count
+      FROM group_daily_peaks
+      WHERE group_id = ?
+      ORDER BY activity_date DESC
+      `,
+      [groupId]
+    );
+
+    return res.json({
+      success: true,
+      data: rows
+    });
+
+  } catch (err) {
+    console.error("getWeeklyPeakSummary error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch weekly peaks"
+    });
+  }
+};
 

@@ -68,6 +68,14 @@ router.get(
   auth,
   analyticsController.getUserCWESTrend
 );
+// ===============================
+// WEEKLY PEAK ACTIVITY (NEW)
+// ===============================
+router.get(
+  "/:groupId/weekly-peaks",
+  auth,
+  analyticsController.getWeeklyPeakSummary
+);
 
 
 module.exports = router;
