@@ -847,4 +847,47 @@ exports.getUserCWESTrend = async (req, res) => {
   }
 };
 // TEMP: run once to create CWES history table
+// ===============================
+// DAILY PEAK COMPUTE (AUTO)
+// ===============================
+exports.computeDailyGroupPeaks = async () => {
+  try {
+    await pool.execute(`
+      INSERT INTO group_daily_peaks
+        (group_id, activity_date,
+         peak_message_hour, peak_message_count,
+         peak_online_hour, peak_online_count)
+      SELECT
+        group_id,
+        activity_date,
+        SUBSTRING_INDEX(GROUP_CONCAT(hour ORDER BY messages_count DESC), ',', 1),
+        MAX(messages_count),
+        SUBSTRING_INDEX(GROUP_CONCAT(hour ORDER BY online_users_count DESC), ',', 1),
+        MAX(online_users_count)
+      FROM group_hourly_activity
+      WHERE activity_date = CURDATE()
+      GROUP BY group_id, activity_date
+      ON DUPLICATE KEY UPDATE
+        peak_message_hour = VALUES(peak_message_hour),
+        peak_message_count = VALUES(peak_message_count),
+        peak_online_hour = VALUES(peak_online_hour),
+        peak_online_count = VALUES(peak_online_count)
+    `);
+
+    // 🔁 Rolling 7-day window cleanup
+    await pool.execute(`
+      DELETE FROM group_daily_peaks
+      WHERE activity_date < DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+    `);
+
+    await pool.execute(`
+      DELETE FROM group_hourly_activity
+      WHERE activity_date < DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+    `);
+
+    console.log("✅ Daily group peaks computed");
+  } catch (err) {
+    console.error("❌ Daily peak compute failed:", err);
+  }
+};
 

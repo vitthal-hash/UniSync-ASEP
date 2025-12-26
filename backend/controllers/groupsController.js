@@ -333,6 +333,23 @@ exports.getOnlineCount = async (req, res) => {
      WHERE gm.group_id = ? AND u.is_online = 1`,
     [groupId]
   );
+// ===============================
+// HOURLY ONLINE USER ANALYTICS
+// ===============================
+const now = new Date();
+const hour = now.getHours();
+const date = now.toISOString().slice(0, 10);
+
+await pool.execute(
+  `
+  INSERT INTO group_hourly_activity
+    (group_id, activity_date, hour, online_users_count)
+  VALUES (?, ?, ?, ?)
+  ON DUPLICATE KEY UPDATE
+    online_users_count = GREATEST(online_users_count, VALUES(online_users_count))
+  `,
+  [groupId, date, hour, onlineCount]
+);
 
   res.json({ success: true, online: rows[0].count });
 };

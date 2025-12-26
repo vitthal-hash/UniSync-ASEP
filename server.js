@@ -167,6 +167,17 @@ app.get("/", (req, res) => {
 
 
 app.use('/uploads', express.static(__dirname + '/uploads'));
+const analyticsController = require("./controllers/analyticsController");
+
+// Run once at server start
+setTimeout(() => {
+  analyticsController.computeDailyGroupPeaks();
+}, 10000);
+
+// Run every 24 hours
+setInterval(() => {
+  analyticsController.computeDailyGroupPeaks();
+}, 24 * 60 * 60 * 1000);
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 UniSync backend running on 0.0.0.0:${PORT}`);

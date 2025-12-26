@@ -310,6 +310,23 @@ VALUES (?, ?, ?, ?, ?, ?, ?)`,
 
 
     const messageId = insertResult.insertId;
+// ===============================
+// HOURLY MESSAGE ANALYTICS
+// ===============================
+const now = new Date();
+const hour = now.getHours();
+const date = now.toISOString().slice(0, 10);
+
+await pool.execute(
+  `
+  INSERT INTO group_hourly_activity
+    (group_id, activity_date, hour, messages_count)
+  VALUES (?, ?, ?, 1)
+  ON DUPLICATE KEY UPDATE
+    messages_count = messages_count + 1
+  `,
+  [groupId, date, hour]
+);
 
     const [userRows] = await pool.execute(
       "SELECT full_name FROM users WHERE id = ? LIMIT 1",
