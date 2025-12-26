@@ -117,7 +117,7 @@ socket.on("vote_poll", async ({ poll_id, option_id }) => {
     await pool.execute(
       `
       INSERT INTO poll_votes (poll_id, option_id, user_id)
-      VALUES (?, ?)
+      VALUES (?, ?, ?)
       `,
       [poll_id, option_id, userId]
     );
