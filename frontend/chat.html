@@ -838,7 +838,7 @@ socket.on("poll_update", (data) => {
     async function loadGifs() {
       gifResults.innerHTML = "Loading...";
       try {
-        const res = await fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=50&rating=g`);
+        const res = await fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=1000&rating=g`);
         const data = await res.json();
         gifResults.innerHTML = "";
         data.data.forEach(g => {
@@ -857,7 +857,7 @@ socket.on("poll_update", (data) => {
     async function loadStickers() {
       stickerResults.innerHTML = "Loading...";
       try {
-        const res = await fetch(`https://api.giphy.com/v1/stickers/trending?api_key=${GIPHY_KEY}&limit=50`);
+        const res = await fetch(`https://api.giphy.com/v1/stickers/trending?api_key=${GIPHY_KEY}&limit=1000`);
         const data = await res.json();
         stickerResults.innerHTML = "";
         data.data.forEach(s => {
