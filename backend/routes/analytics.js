@@ -76,6 +76,14 @@ router.get(
   auth,
   analyticsController.getWeeklyPeakSummary
 );
+// ===============================
+// LIVE TODAY PEAK
+// ===============================
+router.get(
+  "/:groupId/today-live-peak",
+  auth,
+  analyticsController.getTodayLivePeak
+);
 
 
 module.exports = router;

@@ -389,7 +389,7 @@ const computeData = await computeRes.json();
 
 // 2️⃣ Render analytics UI
 renderAnalytics(res);
-renderPeakAnalytics(weeklyPeaks);
+renderPeakAnalytics(groupSelect.value, weeklyPeaks);
 
 
 if (computeData.success) {
@@ -634,28 +634,35 @@ cwesDistChart = new Chart(document.getElementById("cwesDistributionChart"), {
 // REAL CWES MEMBER-WISE GRAPH
 // ===============================
 }
-function renderPeakAnalytics(rows) {
+async function renderPeakAnalytics(groupId, weeklyRows) {
   const todayBox = document.getElementById("todayPeakBox");
   const table = document.getElementById("weeklyPeakTable");
 
-  if (!rows.length) {
-    todayBox.innerHTML = "<li>No data yet</li>";
-    table.innerHTML = "";
-    return;
+  // -------- LIVE TODAY --------
+  const res = await fetch(
+    `${window.UNISYNC_BASE_URL}/api/analytics/${groupId}/today-live-peak`,
+    {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("unisync_token")
+      }
+    }
+  );
+
+  const today = await res.json();
+
+  if (!today.success || today.peak_message_hour === null) {
+    todayBox.innerHTML = "<li>No activity yet today</li>";
+  } else {
+    todayBox.innerHTML = `
+      <li>⏰ Peak Messages: ${today.peak_message_hour}:00 – ${today.peak_message_hour + 1}:00
+          (${today.peak_message_count} msgs)</li>
+      <li>🟢 Peak Online: ${today.peak_online_hour}:00 – ${today.peak_online_hour + 1}:00
+          (${today.peak_online_count} users)</li>
+    `;
   }
 
-  // Today's data (first row)
-  const today = rows[0];
-
-  todayBox.innerHTML = `
-    <li>⏰ Peak Messages: ${today.peak_message_hour}:00 – ${today.peak_message_hour + 1}:00
-        (${today.peak_message_count} msgs)</li>
-    <li>🟢 Peak Online: ${today.peak_online_hour}:00 – ${today.peak_online_hour + 1}:00
-        (${today.peak_online_count} users)</li>
-  `;
-
-  // Weekly table
-  table.innerHTML = rows.map(r => `
+  // -------- LAST 7 DAYS (FROZEN) --------
+  table.innerHTML = weeklyRows.map(r => `
     <tr>
       <td>${new Date(r.activity_date).toLocaleDateString()}</td>
       <td>${r.peak_message_hour}:00 – ${r.peak_message_hour + 1}:00</td>
@@ -665,6 +672,7 @@ function renderPeakAnalytics(rows) {
     </tr>
   `).join("");
 }
+
 
 async function loadMyCWESTrend(groupId) {
   const userId = getLoggedInUserId();

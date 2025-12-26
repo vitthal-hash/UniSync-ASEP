@@ -925,4 +925,55 @@ exports.getWeeklyPeakSummary = async (req, res) => {
     });
   }
 };
+// ===============================
+// LIVE TODAY PEAK (HOURLY)
+// ===============================
+exports.getTodayLivePeak = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    const [rows] = await pool.execute(
+      `
+      SELECT
+        hour,
+        messages_count,
+        online_users_count
+      FROM group_hourly_activity
+      WHERE group_id = ?
+        AND activity_date = CURDATE()
+      `,
+      [groupId]
+    );
+
+    if (!rows.length) {
+      return res.json({
+        success: true,
+        peak_message_hour: null,
+        peak_message_count: 0,
+        peak_online_hour: null,
+        peak_online_count: 0
+      });
+    }
+
+    const peakMessage = rows.reduce((a, b) =>
+      b.messages_count > a.messages_count ? b : a
+    );
+
+    const peakOnline = rows.reduce((a, b) =>
+      b.online_users_count > a.online_users_count ? b : a
+    );
+
+    return res.json({
+      success: true,
+      peak_message_hour: peakMessage.hour,
+      peak_message_count: peakMessage.messages_count,
+      peak_online_hour: peakOnline.hour,
+      peak_online_count: peakOnline.online_users_count
+    });
+
+  } catch (err) {
+    console.error("getTodayLivePeak error:", err);
+    res.status(500).json({ success: false });
+  }
+};
 
