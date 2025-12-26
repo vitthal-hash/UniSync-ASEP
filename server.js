@@ -116,10 +116,10 @@ socket.on("vote_poll", async ({ poll_id, option_id }) => {
     // 2️⃣ INSERT new vote
     await pool.execute(
       `
-      INSERT INTO poll_votes (option_id, user_id)
+      INSERT INTO poll_votes (poll_id, option_id, user_id)
       VALUES (?, ?)
       `,
-      [option_id, userId]
+      [poll_id, option_id, userId]
     );
 
     // 3️⃣ Fetch updated poll data
