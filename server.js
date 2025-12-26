@@ -167,7 +167,8 @@ app.get("/", (req, res) => {
 
 
 app.use('/uploads', express.static(__dirname + '/uploads'));
-const analyticsController = require("./controllers/analyticsController");
+const analyticsController = require("./backend/controllers/analyticsController");
+
 
 // Run once at server start
 setTimeout(() => {

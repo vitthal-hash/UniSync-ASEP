@@ -348,7 +348,7 @@ await pool.execute(
   ON DUPLICATE KEY UPDATE
     online_users_count = GREATEST(online_users_count, VALUES(online_users_count))
   `,
-  [groupId, date, hour, onlineCount]
+  [groupId, date, hour, rows[0].count]
 );
 
   res.json({ success: true, online: rows[0].count });
