@@ -88,7 +88,8 @@
     .chat-image { max-width:300px; max-height:300px; border-radius:12px; cursor:pointer; transition:transform .3s ease; box-shadow:0 4px 12px rgba(0,0,0,.1); }
     .chat-image:hover { transform:scale(1.02); }
 
-    .chat-input-area { padding:1rem 1.5rem; background:var(--msg-bg); border-top:1px solid var(--msg-border); display:flex; gap:.75rem; align-items:center; }
+    .chat-input-area { padding:1rem 1.5rem; background:var(--msg-bg); border-top:1px solid var(--msg-border); display:flex; gap:.75rem; align-items:center;  position: relative;   /* 🔥 THIS IS MANDATORY */
+  z-index: 50;}
     .input-wrapper { flex:1; display:flex; align-items:center; background:var(--msg-bg-other); border-radius:24px; padding:.5rem 1rem; border:1px solid var(--msg-border); }
     #messageInput { flex:1; border:none; background:transparent; color:var(--msg-text); font-size:1rem; padding:.5rem; outline:none; }
     .icon-btn { width:40px; height:40px; border-radius:50%; border:none; background:transparent; color:var(--msg-time); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .3s ease; }
@@ -107,18 +108,19 @@
     #replyPreview { background: linear-gradient(135deg, rgba(99,102,241,.07), rgba(59,130,246,.07)); border-left:4px solid var(--primary-color); margin:.5rem 0; padding:.75rem; border-radius:12px; display:flex; justify-content:space-between; align-items:center; animation:slideDown .3s ease; }
     @keyframes slideDown { from{opacity:0; transform:translateY(-20px)} to{opacity:1; transform:translateY(0)} }
 
-    .filter-menu {
+   .filter-menu {
   position: absolute;
-  bottom: calc(100% + 8px);   /* small gap above input bar */
-  left: 0;
+  bottom: 70px;                 /* ⬅ exact height of input bar */
+  left: 12px;
   background: var(--msg-bg);
   border-radius: 14px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.25);
   padding: 6px;
   min-width: 220px;
-  z-index: 5000;              /* 🔥 important */
+  z-index: 9999;                /* must be higher than chat */
   display: none;
 }
+
 .filter-menu::after {
   content: "";
   position: absolute;
