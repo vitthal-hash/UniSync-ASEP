@@ -108,29 +108,24 @@
     #replyPreview { background: linear-gradient(135deg, rgba(99,102,241,.07), rgba(59,130,246,.07)); border-left:4px solid var(--primary-color); margin:.5rem 0; padding:.75rem; border-radius:12px; display:flex; justify-content:space-between; align-items:center; animation:slideDown .3s ease; }
     @keyframes slideDown { from{opacity:0; transform:translateY(-20px)} to{opacity:1; transform:translateY(0)} }
 
-  .chat-main {
-  position: relative;
-}
-
-.filter-menu {
+   .filter-menu {
   position: absolute;
-  bottom: 96px;              /* ABOVE input bar */
-  left: 24px;
+  bottom: 110px;
+  left: 12px;
 
   background: var(--msg-bg);
   border-radius: 16px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.25);
 
-  padding: 12px 8px;
-  width: 260px;
+  padding: 10px 8px;        /* ⬅ more inner space */
+  min-width: 260px;         /* ⬅ WIDER box */
+  min-height: 220px;        /* ⬅ THIS FIXES OVERFLOW */
 
-  z-index: 20;
   display: none;
-}
-.filter-menu.show {
-  display: block;
-}
+  z-index: 9999;
 
+  overflow: hidden;         /* ⬅ force content inside */
+}
 
 
 .filter-menu::after {
