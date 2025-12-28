@@ -110,16 +110,23 @@
 
    .filter-menu {
   position: absolute;
-  bottom: 70px;                 /* ⬅ exact height of input bar */
+  bottom: 70px;
   left: 12px;
+
   background: var(--msg-bg);
-  border-radius: 14px;
+  border-radius: 16px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.25);
-  padding: 6px;
-  min-width: 220px;
-  z-index: 9999;                /* must be higher than chat */
+
+  padding: 10px 8px;        /* ⬅ more inner space */
+  min-width: 260px;         /* ⬅ WIDER box */
+  min-height: 220px;        /* ⬅ THIS FIXES OVERFLOW */
+
   display: none;
+  z-index: 9999;
+
+  overflow: hidden;         /* ⬅ force content inside */
 }
+
 
 .filter-menu::after {
   content: "";
@@ -132,8 +139,26 @@
 }
 
     .filter-menu.show { display:block; animation:slideDown .2s ease; }
-    .msg-filter-option { padding:.75rem 1rem; border-radius:8px; cursor:pointer; transition:all .3s ease; color:var(--msg-text); }
+    .msg-filter-option {
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: var(--msg-text);
+
+  display: flex;
+  align-items: center;
+  gap: 10px;               /* icon + text spacing */
+  font-size: 15px;
+}
+
     .msg-filter-option:hover { background:var(--primary-color); color:white; }
+.filter-menu hr {
+  margin: 8px 6px;
+  border: none;
+  height: 1px;
+  background: #e5e7eb;
+}
 
     /* small helpers */
     .badge { font-size:11px; padding:2px 6px; border-radius:6px; background:rgba(0,0,0,0.06); margin-left:6px; }
