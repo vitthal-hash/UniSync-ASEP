@@ -108,24 +108,29 @@
     #replyPreview { background: linear-gradient(135deg, rgba(99,102,241,.07), rgba(59,130,246,.07)); border-left:4px solid var(--primary-color); margin:.5rem 0; padding:.75rem; border-radius:12px; display:flex; justify-content:space-between; align-items:center; animation:slideDown .3s ease; }
     @keyframes slideDown { from{opacity:0; transform:translateY(-20px)} to{opacity:1; transform:translateY(0)} }
 
-   .filter-menu {
+  .chat-main {
+  position: relative;
+}
+
+.filter-menu {
   position: absolute;
-  bottom: 110px;
-  left: 12px;
+  bottom: 96px;              /* ABOVE input bar */
+  left: 24px;
 
   background: var(--msg-bg);
   border-radius: 16px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.25);
 
-  padding: 10px 8px;        /* ⬅ more inner space */
-  min-width: 260px;         /* ⬅ WIDER box */
-  min-height: 220px;        /* ⬅ THIS FIXES OVERFLOW */
+  padding: 12px 8px;
+  width: 260px;
 
+  z-index: 20;
   display: none;
-  z-index: 9999;
-
-  overflow: hidden;         /* ⬅ force content inside */
 }
+.filter-menu.show {
+  display: block;
+}
+
 
 
 .filter-menu::after {
@@ -530,16 +535,7 @@ body.dark .reaction-summary span {
       <div id="typingIndicator"></div>
 
       <div id="chatWindow" class="chat-window"></div>
-
-      <div id="replyPreview" style="display:none;"></div>
-<div id="adminOnlyNotice"
-     style="display:none; text-align:center; padding:8px;
-            color:#555; font-size:14px;">
-  Only admins can send messages
-</div>
-
-      <div class="chat-input-area">
-        <div class="msg-filter-container" style="position: relative;">
+   <div class="msg-filter-container" style="position: relative;">
           <button id="msgFilterBtn" class="icon-btn" title="Filter Options">
             <i class="fas fa-sliders-h"></i>
           </button>
@@ -554,6 +550,15 @@ body.dark .reaction-summary span {
 </div>
           </div>
         </div>
+      <div id="replyPreview" style="display:none;"></div>
+<div id="adminOnlyNotice"
+     style="display:none; text-align:center; padding:8px;
+            color:#555; font-size:14px;">
+  Only admins can send messages
+</div>
+
+      <div class="chat-input-area">
+     
 
         <button id="pinBtn" class="icon-btn" title="Attach File"><i class="fas fa-paperclip"></i></button>
 
